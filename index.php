@@ -2,6 +2,7 @@
 $genres = [
     'text' => ['label' => 'テキスト', 'icon' => 'type'],
     'image' => ['label' => '画像効果', 'icon' => 'image'],
+    'block' => ['label' => 'ブロック', 'icon' => 'square'],
     'layout' => ['label' => 'レイアウト', 'icon' => 'columns-3'],
 ];
 ?>
@@ -171,11 +172,45 @@ $genres = [
                             <select-field label="表示方法" v-model="settings.image.fit" :options="options.imageFit"></select-field>
                         </div>
                         <select-field label="影" v-model="settings.image.shadow" :options="options.imageShadow"></select-field>
+                        <div class="grid grid-cols-2 gap-3">
+                            <select-field label="枠線の太さ" v-model="settings.image.borderWidth" :options="options.blockBorderWidth"></select-field>
+                            <select-field label="枠線の種類" v-model="settings.image.borderStyle" :options="options.blockBorderStyle"></select-field>
+                        </div>
+                        <color-field v-if="settings.image.borderWidth" label="枠線の色" v-model="settings.image.borderColor"></color-field>
                         <div>
                             <div class="mb-2 flex items-center justify-between"><label class="text-sm font-semibold">透明度</label><span class="rounded bg-slate-100 px-2 py-0.5 text-xs font-bold">{{ settings.image.opacity }}%</span></div>
                             <input v-model.number="settings.image.opacity" type="range" min="0" max="100" step="1" class="w-full">
                         </div>
                         <select-field label="マスク" v-model="settings.image.mask" :options="options.imageMask"></select-field>
+                    </template>
+
+                    <template v-if="genre === 'block'">
+                        <field-label label="ブロック内のテキスト">
+                            <textarea v-model="settings.block.content" rows="2" class="control w-full resize-none rounded-md border border-slate-300 px-3 py-2 text-sm"></textarea>
+                        </field-label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <select-field label="横幅" v-model="settings.block.width" :options="options.blockWidth"></select-field>
+                            <select-field label="高さ" v-model="settings.block.height" :options="options.blockHeight"></select-field>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <color-field label="背景色" v-model="settings.block.background"></color-field>
+                            <color-field label="文字色" v-model="settings.block.color"></color-field>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <select-field label="内側の余白" v-model="settings.block.padding" :options="options.blockPadding"></select-field>
+                            <select-field label="角丸" v-model="settings.block.radius" :options="options.blockRadius"></select-field>
+                        </div>
+                        <select-field label="影" v-model="settings.block.shadow" :options="options.blockShadow"></select-field>
+                        <div class="grid grid-cols-2 gap-3">
+                            <select-field label="枠線の太さ" v-model="settings.block.borderWidth" :options="options.blockBorderWidth"></select-field>
+                            <select-field label="枠線の種類" v-model="settings.block.borderStyle" :options="options.blockBorderStyle"></select-field>
+                        </div>
+                        <color-field v-if="settings.block.borderWidth" label="枠線の色" v-model="settings.block.borderColor"></color-field>
+                        <select-field label="内容の配置" v-model="settings.block.alignment" :options="options.blockAlignment"></select-field>
+                        <div>
+                            <div class="mb-2 flex items-center justify-between"><label class="text-sm font-semibold">透明度</label><span class="rounded bg-slate-100 px-2 py-0.5 text-xs font-bold">{{ settings.block.opacity }}%</span></div>
+                            <input v-model.number="settings.block.opacity" type="range" min="0" max="100" step="1" class="w-full">
+                        </div>
                     </template>
 
                     <template v-if="genre === 'layout'">
@@ -201,6 +236,7 @@ $genres = [
                         <div :style="previewFrameStyle" class="mx-auto flex min-h-[360px] items-center justify-center overflow-hidden bg-white p-5 shadow-sm transition-all duration-300 sm:p-10">
                             <div v-if="genre === 'text'" :class="generatedClasses" :style="generatedStyle">{{ settings.text.content }}</div>
                             <img v-if="genre === 'image'" :src="settings.image.src" :alt="settings.image.alt" :class="generatedClasses" :style="generatedStyle">
+                            <div v-if="genre === 'block'" :class="generatedClasses" :style="generatedStyle">{{ settings.block.content }}</div>
                             <div v-if="genre === 'layout'" :class="generatedClasses" class="w-full">
                                 <div v-for="n in settings.layout.columns" :key="n" class="grid min-h-24 place-items-center rounded-md font-bold text-white" :style="{backgroundColor: settings.layout.color, opacity: 1 - ((n - 1) * .12)}">Item {{ n }}</div>
                             </div>
@@ -229,7 +265,8 @@ const { createApp, nextTick } = Vue;
 
 const defaults = {
     text: { content: 'デザインを、もっと自由に。', sizeMode: 'preset', size: 'text-4xl', sizeValue: 36, sizeUnit: 'px', family: 'font-sans', weightMode: 'preset', weight: 'font-bold', weightValue: 700, align: 'text-center', leadingMode: 'preset', leading: 'leading-tight', leadingValue: 1.25, leadingUnit: '', tracking: 'tracking-normal', wordBreak: 'break-normal', color: '#0f172a', italic: false, underline: false },
-    image: { src: 'https://tbpdigital.jp/wp-content/uploads/2026/05/service_02.png', alt: 'サービスイメージ', sizeMode: 'preset', width: 'w-96', widthValue: 480, widthUnit: 'px', aspect: 'aspect-auto', fit: 'object-cover', shadow: 'shadow-xl', opacity: 100, mask: 'none' },
+    image: { src: 'https://tbpdigital.jp/wp-content/uploads/2026/05/service_02.png', alt: 'サービスイメージ', sizeMode: 'preset', width: 'w-96', widthValue: 480, widthUnit: 'px', aspect: 'aspect-auto', fit: 'object-cover', shadow: 'shadow-xl', borderWidth: '', borderStyle: 'border-solid', borderColor: '#0f766e', opacity: 100, mask: 'none' },
+    block: { content: 'ブロックコンテンツ', width: 'w-80', height: 'min-h-40', background: '#0f766e', color: '#ffffff', padding: 'p-6', radius: 'rounded-md', shadow: 'shadow-lg', borderWidth: '', borderStyle: 'border-solid', borderColor: '#134e4a', alignment: 'items-center justify-center text-center', opacity: 100 },
     layout: { columns: 3, gap: 'gap-4', align: 'items-stretch', color: '#0f766e', responsive: true }
 };
 
@@ -248,6 +285,14 @@ const options = {
     imageFit: [['object-cover','範囲を覆う'],['object-contain','全体を表示'],['object-fill','範囲に合わせる']],
     imageShadow: [['shadow-none','なし'],['shadow-md','標準'],['shadow-xl','大'],['shadow-2xl','最大']],
     imageMask: [['none','なし'],['circle','円形'],['ellipse','楕円'],['diamond','ひし形'],['hexagon','六角形'],['slant','斜め'],['fade','下へフェード']],
+    blockWidth: [['w-48','小'],['w-80','標準'],['w-96','大'],['w-full','横幅いっぱい']],
+    blockHeight: [['min-h-24','低い'],['min-h-40','標準'],['min-h-64','高い'],['min-h-80','最大']],
+    blockPadding: [['p-0','なし'],['p-3','小'],['p-6','標準'],['p-10','大']],
+    blockRadius: [['rounded-none','なし'],['rounded','小'],['rounded-md','標準'],['rounded-lg','大'],['rounded-full','最大']],
+    blockShadow: [['shadow-none','なし'],['shadow-sm','小'],['shadow-lg','標準'],['shadow-2xl','大']],
+    blockBorderWidth: [['','なし'],['border','1px'],['border-2','2px'],['border-4','4px'],['border-8','8px']],
+    blockBorderStyle: [['border-solid','実線'],['border-dashed','破線'],['border-dotted','点線'],['border-double','二重線']],
+    blockAlignment: [['items-start justify-start text-left','左上'],['items-center justify-center text-center','中央'],['items-end justify-end text-right','右下']],
     gap: [['gap-2','狭い'],['gap-4','標準'],['gap-6','広い'],['gap-8','とても広い']],
     items: [['items-start','上'],['items-center','中央'],['items-end','下'],['items-stretch','伸ばす']]
 };
@@ -267,8 +312,8 @@ const app = createApp({
         ]
     }),
     computed: {
-        genreLabel() { return {text:'Typography',image:'Image effects',layout:'Layout'}[this.genre]; },
-        genreTitle() { return {text:'テキストを装飾',image:'画像に効果を追加',layout:'グリッドを構成'}[this.genre]; },
+        genreLabel() { return {text:'Typography',image:'Image effects',block:'Block style',layout:'Layout'}[this.genre]; },
+        genreTitle() { return {text:'テキストを装飾',image:'画像に効果を追加',block:'ブロックを装飾',layout:'グリッドを構成'}[this.genre]; },
         viewportWidth() { return {mobile:'375px',tablet:'768px',desktop:'100%'}[this.viewport]; },
         previewFrameStyle() { return { width: this.viewportWidth, maxWidth: '100%' }; },
         generatedClasses() {
@@ -282,14 +327,23 @@ const app = createApp({
             if (this.genre === 'image') {
                 const width = s.sizeMode === 'custom' ? this.numericClass('w', s.widthValue, s.widthUnit, 1, 1600) : s.width;
                 const opacity = `opacity-[${Math.min(100, Math.max(0, Number(s.opacity) || 0)) / 100}]`;
-                return [width,'max-w-full',s.aspect,s.fit,s.shadow,opacity,this.imageMaskClass].filter(Boolean).join(' ');
+                const borderColor = s.borderWidth ? `border-[${s.borderColor}]` : '';
+                return [width,'max-w-full',s.aspect,s.fit,s.shadow,s.borderWidth,s.borderStyle,borderColor,opacity,this.imageMaskClass].filter(Boolean).join(' ');
+            }
+            if (this.genre === 'block') {
+                const opacity = `opacity-[${Math.min(100, Math.max(0, Number(s.opacity) || 0)) / 100}]`;
+                const background = `bg-[${s.background}]`;
+                const color = `text-[${s.color}]`;
+                const borderColor = s.borderWidth ? `border-[${s.borderColor}]` : '';
+                return ['flex','max-w-full',s.width,s.height,s.padding,s.radius,s.shadow,s.borderWidth,s.borderStyle,borderColor,background,color,s.alignment,opacity,'whitespace-pre-line'].filter(Boolean).join(' ');
             }
             return ['grid',s.responsive?'grid-cols-1 sm:grid-cols-'+s.columns:'grid-cols-'+s.columns,s.gap,s.align].join(' ');
         },
         generatedStyle() {
             const s = this.settings[this.genre];
             if (this.genre === 'text') return { color: s.color };
-            if (this.genre === 'image') return this.imageMaskStyle;
+            if (this.genre === 'image') return { ...this.imageMaskStyle, borderColor: s.borderColor };
+            if (this.genre === 'block') return { backgroundColor: s.background, color: s.color, borderColor: s.borderColor };
             return {};
         },
         imageMaskClass() {
@@ -313,6 +367,7 @@ const app = createApp({
             const s = this.settings[this.genre];
             if (this.genre === 'text') return `<p class="${this.generatedClasses}" style="color: ${s.color}">\n  ${esc(s.content)}\n</p>`;
             if (this.genre === 'image') return `<img\n  src="${esc(s.src)}"\n  alt="${esc(s.alt)}"\n  class="${this.generatedClasses}"\n>`;
+            if (this.genre === 'block') return `<div class="${this.generatedClasses}">\n  ${esc(s.content)}\n</div>`;
             const child = Array.from({length:s.columns},(_,i) => `  <div class="rounded-md p-6">Item ${i+1}</div>`).join('\n');
             return `<div class="${this.generatedClasses}">\n${child}\n</div>`;
         }
