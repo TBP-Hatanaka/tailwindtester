@@ -85,12 +85,56 @@ $genres = [
                         <field-label label="表示テキスト">
                             <textarea v-model="settings.text.content" rows="3" class="control w-full resize-none rounded-md border border-slate-300 px-3 py-2 text-sm"></textarea>
                         </field-label>
-                        <select-field label="文字サイズ" v-model="settings.text.size" :options="options.textSize"></select-field>
-                        <div class="grid grid-cols-2 gap-3">
-                            <select-field label="太さ" v-model="settings.text.weight" :options="options.weight"></select-field>
-                            <select-field label="配置" v-model="settings.text.align" :options="options.align"></select-field>
+                        <select-field label="フォント" v-model="settings.text.family" :options="options.fontFamily"></select-field>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-sm font-semibold">文字サイズ</span>
+                                <select v-model="settings.text.sizeMode" class="control rounded-md border border-slate-300 bg-white px-2 py-1 text-xs">
+                                    <option value="preset">プリセット</option>
+                                    <option value="custom">数値指定</option>
+                                </select>
+                            </div>
+                            <select v-if="settings.text.sizeMode === 'preset'" v-model="settings.text.size" class="control w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">
+                                <option v-for="item in options.textSize" :key="item[0]" :value="item[0]">{{ item[1] }}</option>
+                            </select>
+                            <div v-else class="grid grid-cols-[minmax(0,1fr)_100px] gap-2">
+                                <input v-model.number="settings.text.sizeValue" type="number" min="0.1" max="500" step="0.1" aria-label="文字サイズの数値" class="control min-w-0 rounded-md border border-slate-300 px-3 py-2 text-sm">
+                                <select v-model="settings.text.sizeUnit" aria-label="文字サイズの単位" class="control rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">
+                                    <option v-for="unit in options.sizeUnits" :key="unit" :value="unit">{{ unit }}</option>
+                                </select>
+                            </div>
                         </div>
-                        <select-field label="行間" v-model="settings.text.leading" :options="options.leading"></select-field>
+                        <div class="grid grid-cols-2 gap-3">
+                            <select-field label="配置" v-model="settings.text.align" :options="options.align"></select-field>
+                            <select-field label="太さの指定" v-model="settings.text.weightMode" :options="options.valueMode"></select-field>
+                        </div>
+                        <select-field v-if="settings.text.weightMode === 'preset'" label="太さ" v-model="settings.text.weight" :options="options.weight"></select-field>
+                        <field-label v-else label="太さ（100〜900）">
+                            <input v-model.number="settings.text.weightValue" type="number" min="100" max="900" step="50" class="control w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+                        </field-label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <select-field label="文字の間隔" v-model="settings.text.tracking" :options="options.tracking"></select-field>
+                            <select-field label="単語の折り返し" v-model="settings.text.wordBreak" :options="options.wordBreak"></select-field>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-sm font-semibold">行間</span>
+                                <select v-model="settings.text.leadingMode" class="control rounded-md border border-slate-300 bg-white px-2 py-1 text-xs">
+                                    <option value="preset">プリセット</option>
+                                    <option value="custom">数値指定</option>
+                                </select>
+                            </div>
+                            <select v-if="settings.text.leadingMode === 'preset'" v-model="settings.text.leading" class="control w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">
+                                <option v-for="item in options.leading" :key="item[0]" :value="item[0]">{{ item[1] }}</option>
+                            </select>
+                            <div v-else class="grid grid-cols-[minmax(0,1fr)_100px] gap-2">
+                                <input v-model.number="settings.text.leadingValue" type="number" min="0.1" max="500" step="0.05" aria-label="行間の数値" class="control min-w-0 rounded-md border border-slate-300 px-3 py-2 text-sm">
+                                <select v-model="settings.text.leadingUnit" aria-label="行間の単位" class="control rounded-md border border-slate-300 bg-white px-2 py-2 text-sm">
+                                    <option value="">単位なし</option>
+                                    <option v-for="unit in options.sizeUnits" :key="unit" :value="unit">{{ unit }}</option>
+                                </select>
+                            </div>
+                        </div>
                         <color-field label="文字色" v-model="settings.text.color"></color-field>
                         <div class="grid grid-cols-2 gap-3">
                             <toggle-field label="斜体" v-model="settings.text.italic"></toggle-field>
@@ -186,7 +230,7 @@ $genres = [
 const { createApp, nextTick } = Vue;
 
 const defaults = {
-    text: { content: 'デザインを、もっと自由に。', size: 'text-4xl', weight: 'font-bold', align: 'text-center', leading: 'leading-tight', color: '#0f172a', italic: false, underline: false },
+    text: { content: 'デザインを、もっと自由に。', sizeMode: 'preset', size: 'text-4xl', sizeValue: 36, sizeUnit: 'px', family: 'font-sans', weightMode: 'preset', weight: 'font-bold', weightValue: 700, align: 'text-center', leadingMode: 'preset', leading: 'leading-tight', leadingValue: 1.25, leadingUnit: '', tracking: 'tracking-normal', wordBreak: 'break-normal', color: '#0f172a', italic: false, underline: false },
     button: { content: '詳しく見る', size: 'px-5 py-3 text-sm', background: '#0f766e', color: '#ffffff', radius: 'rounded-md', shadow: 'shadow-md', border: false, icon: true },
     card: { title: 'プロジェクトを始めましょう', body: '設定したスタイルをリアルタイムで確認し、そのまま使えるTailwind CSSコードを生成できます。', background: '#ffffff', accent: '#0f766e', padding: 'p-6', radius: 'rounded-lg', shadow: 'shadow-lg', line: true },
     layout: { columns: 3, gap: 'gap-4', align: 'items-stretch', color: '#0f766e', responsive: true }
@@ -194,9 +238,14 @@ const defaults = {
 
 const options = {
     textSize: [['text-sm','小'],['text-base','標準'],['text-xl','大'],['text-4xl','特大'],['text-6xl','見出し']],
+    sizeUnits: ['px','pt','rem','em'],
+    valueMode: [['preset','プリセット'],['custom','数値指定']],
+    fontFamily: [['font-sans','ゴシック（Sans Serif）'],['font-serif','明朝（Serif）'],['font-mono','等幅（Monospace）']],
     weight: [['font-normal','標準'],['font-medium','ミディアム'],['font-semibold','セミボールド'],['font-bold','ボールド'],['font-black','ブラック']],
     align: [['text-left','左揃え'],['text-center','中央揃え'],['text-right','右揃え']],
     leading: [['leading-none','詰める'],['leading-tight','狭い'],['leading-normal','標準'],['leading-relaxed','広い']],
+    tracking: [['tracking-tighter','かなり狭い'],['tracking-tight','狭い'],['tracking-normal','標準'],['tracking-wide','広い'],['tracking-wider','かなり広い'],['tracking-widest','最大']],
+    wordBreak: [['break-normal','通常'],['break-keep','単語を分割しない'],['break-words','必要な場合のみ'],['break-all','文字単位']],
     buttonSize: [['px-3 py-2 text-xs','小'],['px-5 py-3 text-sm','標準'],['px-7 py-4 text-base','大']],
     radius: [['rounded-none','なし'],['rounded','小'],['rounded-md','標準'],['rounded-lg','大'],['rounded-full','最大']],
     shadow: [['shadow-none','なし'],['shadow-sm','小'],['shadow-md','標準'],['shadow-lg','大']],
@@ -226,7 +275,12 @@ const app = createApp({
         previewFrameStyle() { return { width: this.viewportWidth, maxWidth: '100%' }; },
         generatedClasses() {
             const s = this.settings[this.genre];
-            if (this.genre === 'text') return [s.size,s.weight,s.align,s.leading,s.italic?'italic':'',s.underline?'underline':'','whitespace-pre-line'].filter(Boolean).join(' ');
+            if (this.genre === 'text') {
+                const size = s.sizeMode === 'custom' ? this.numericClass('text', s.sizeValue, s.sizeUnit, 0.1, 500) : s.size;
+                const weight = s.weightMode === 'custom' ? this.numericClass('font', s.weightValue, '', 100, 900) : s.weight;
+                const leading = s.leadingMode === 'custom' ? this.numericClass('leading', s.leadingValue, s.leadingUnit, 0.1, 500) : s.leading;
+                return [size,s.family,weight,s.align,leading,s.tracking,s.wordBreak,s.italic?'italic':'',s.underline?'underline':'','whitespace-pre-line'].filter(Boolean).join(' ');
+            }
             if (this.genre === 'button') return [s.size,s.radius,s.shadow,'inline-flex items-center justify-center gap-2 font-semibold transition hover:brightness-110',s.border?'border border-current':''].filter(Boolean).join(' ');
             if (this.genre === 'card') return ['w-full max-w-sm overflow-hidden border border-slate-200',s.radius,s.shadow].filter(Boolean).join(' ');
             return ['grid',s.responsive?'grid-cols-1 sm:grid-cols-'+s.columns:'grid-cols-'+s.columns,s.gap,s.align].join(' ');
@@ -249,6 +303,11 @@ const app = createApp({
         }
     },
     methods: {
+        numericClass(prefix, value, unit, min, max) {
+            const number = Number(value);
+            const safeValue = Number.isFinite(number) ? Math.min(max, Math.max(min, number)) : min;
+            return `${prefix}-[${safeValue}${unit}]`;
+        },
         selectGenre(value) { this.genre = value; this.refreshIcons(); },
         resetCurrent() { this.settings[this.genre] = JSON.parse(JSON.stringify(defaults[this.genre])); this.showToast('設定をリセットしました'); this.refreshIcons(); },
         async copyCode() {
