@@ -55,7 +55,7 @@ $genres = [
                     </button>
                 <?php endforeach; ?>
             </nav>
-            <button type="button" @click="resetCurrent" class="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50" title="現在の設定をリセット">
+            <button type="button" @click="resetCurrent" class="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50" title="入力内容を残して装飾をリセット">
                 <i data-lucide="rotate-ccw" class="h-4 w-4"></i>
                 リセット
             </button>
@@ -474,7 +474,14 @@ const app = createApp({
             return `${prefix}-[${safeValue}${unit}]`;
         },
         selectGenre(value) { this.genre = value; this.refreshIcons(); },
-        resetCurrent() { this.settings[this.genre] = JSON.parse(JSON.stringify(defaults[this.genre])); this.showToast('設定をリセットしました'); this.refreshIcons(); },
+        resetCurrent() {
+            const current = this.settings[this.genre];
+            const contentKeys = ['content', 'src', 'alt'];
+            const preserved = Object.fromEntries(contentKeys.filter(key => key in current).map(key => [key, current[key]]));
+            this.settings[this.genre] = { ...JSON.parse(JSON.stringify(defaults[this.genre])), ...preserved };
+            this.showToast('装飾設定をリセットしました');
+            this.refreshIcons();
+        },
         async copyCode() {
             try {
                 await navigator.clipboard.writeText(this.generatedCode);
