@@ -1,7 +1,8 @@
 <?php
 $genres = [
     'text' => ['label' => 'テキスト', 'icon' => 'type'],
-    'image' => ['label' => '画像効果', 'icon' => 'image'],
+    'image' => ['label' => '画像変形', 'icon' => 'scan'],
+    'imageFilter' => ['label' => '画像フィルター', 'icon' => 'sliders-horizontal'],
     'block' => ['label' => 'ブロック', 'icon' => 'square'],
     'layout' => ['label' => 'レイアウト', 'icon' => 'columns-3'],
 ];
@@ -184,6 +185,24 @@ $genres = [
                         <select-field label="マスク" v-model="settings.image.mask" :options="options.imageMask"></select-field>
                     </template>
 
+                    <template v-if="genre === 'imageFilter'">
+                        <field-label label="画像URL">
+                            <textarea v-model="settings.imageFilter.src" rows="3" class="control w-full resize-none break-all rounded-md border border-slate-300 px-3 py-2 text-sm"></textarea>
+                        </field-label>
+                        <field-label label="代替テキスト">
+                            <input v-model="settings.imageFilter.alt" class="control w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+                        </field-label>
+                        <select-field label="画像サイズ" v-model="settings.imageFilter.width" :options="options.imageWidth"></select-field>
+                        <range-field label="明るさ" v-model="settings.imageFilter.brightness" :min="0" :max="200" :step="1" suffix="%"></range-field>
+                        <range-field label="コントラスト" v-model="settings.imageFilter.contrast" :min="0" :max="200" :step="1" suffix="%"></range-field>
+                        <range-field label="彩度" v-model="settings.imageFilter.saturation" :min="0" :max="200" :step="1" suffix="%"></range-field>
+                        <range-field label="グレースケール" v-model="settings.imageFilter.grayscale" :min="0" :max="100" :step="1" suffix="%"></range-field>
+                        <range-field label="セピア" v-model="settings.imageFilter.sepia" :min="0" :max="100" :step="1" suffix="%"></range-field>
+                        <range-field label="色相回転" v-model="settings.imageFilter.hue" :min="0" :max="360" :step="1" suffix="°"></range-field>
+                        <range-field label="ぼかし" v-model="settings.imageFilter.blur" :min="0" :max="20" :step="0.5" suffix="px"></range-field>
+                        <range-field label="色反転" v-model="settings.imageFilter.invert" :min="0" :max="100" :step="1" suffix="%"></range-field>
+                    </template>
+
                     <template v-if="genre === 'block'">
                         <field-label label="ブロック内のテキスト">
                             <textarea v-model="settings.block.content" rows="2" class="control w-full resize-none rounded-md border border-slate-300 px-3 py-2 text-sm"></textarea>
@@ -236,6 +255,7 @@ $genres = [
                         <div :style="previewFrameStyle" class="mx-auto flex min-h-[360px] items-center justify-center overflow-hidden bg-white p-5 shadow-sm transition-all duration-300 sm:p-10">
                             <div v-if="genre === 'text'" :class="generatedClasses" :style="generatedStyle">{{ settings.text.content }}</div>
                             <img v-if="genre === 'image'" :src="settings.image.src" :alt="settings.image.alt" :class="generatedClasses" :style="generatedStyle">
+                            <img v-if="genre === 'imageFilter'" :src="settings.imageFilter.src" :alt="settings.imageFilter.alt" :class="generatedClasses" :style="generatedStyle">
                             <div v-if="genre === 'block'" :class="generatedClasses" :style="generatedStyle">{{ settings.block.content }}</div>
                             <div v-if="genre === 'layout'" :class="generatedClasses" class="w-full">
                                 <div v-for="n in settings.layout.columns" :key="n" class="grid min-h-24 place-items-center rounded-md font-bold text-white" :style="{backgroundColor: settings.layout.color, opacity: 1 - ((n - 1) * .12)}">Item {{ n }}</div>
@@ -266,6 +286,7 @@ const { createApp, nextTick } = Vue;
 const defaults = {
     text: { content: 'デザインを、もっと自由に。', sizeMode: 'preset', size: 'text-4xl', sizeValue: 36, sizeUnit: 'px', family: 'font-sans', weightMode: 'preset', weight: 'font-bold', weightValue: 700, align: 'text-center', leadingMode: 'preset', leading: 'leading-tight', leadingValue: 1.25, leadingUnit: '', tracking: 'tracking-normal', wordBreak: 'break-normal', color: '#0f172a', italic: false, underline: false },
     image: { src: 'https://tbpdigital.jp/wp-content/uploads/2026/05/service_02.png', alt: 'サービスイメージ', sizeMode: 'preset', width: 'w-96', widthValue: 480, widthUnit: 'px', aspect: 'aspect-auto', fit: 'object-cover', shadow: 'shadow-xl', borderWidth: '', borderStyle: 'border-solid', borderColor: '#0f766e', opacity: 100, mask: 'none' },
+    imageFilter: { src: 'https://tbpdigital.jp/wp-content/uploads/2026/05/service_02.png', alt: 'フィルター適用イメージ', width: 'w-96', brightness: 100, contrast: 100, saturation: 100, grayscale: 0, sepia: 0, hue: 0, blur: 0, invert: 0 },
     block: { content: 'ブロックコンテンツ', width: 'w-80', height: 'min-h-40', background: '#0f766e', color: '#ffffff', padding: 'p-6', radius: 'rounded-md', shadow: 'shadow-lg', borderWidth: '', borderStyle: 'border-solid', borderColor: '#134e4a', alignment: 'items-center justify-center text-center', opacity: 100 },
     layout: { columns: 3, gap: 'gap-4', align: 'items-stretch', color: '#0f766e', responsive: true }
 };
@@ -312,8 +333,8 @@ const app = createApp({
         ]
     }),
     computed: {
-        genreLabel() { return {text:'Typography',image:'Image effects',block:'Block style',layout:'Layout'}[this.genre]; },
-        genreTitle() { return {text:'テキストを装飾',image:'画像に効果を追加',block:'ブロックを装飾',layout:'グリッドを構成'}[this.genre]; },
+        genreLabel() { return {text:'Typography',image:'Image transform',imageFilter:'Image filter',block:'Block style',layout:'Layout'}[this.genre]; },
+        genreTitle() { return {text:'テキストを装飾',image:'画像を変形',imageFilter:'画像にフィルターを適用',block:'ブロックを装飾',layout:'グリッドを構成'}[this.genre]; },
         viewportWidth() { return {mobile:'375px',tablet:'768px',desktop:'100%'}[this.viewport]; },
         previewFrameStyle() { return { width: this.viewportWidth, maxWidth: '100%' }; },
         generatedClasses() {
@@ -330,6 +351,9 @@ const app = createApp({
                 const borderColor = s.borderWidth ? `border-[${s.borderColor}]` : '';
                 return [width,'max-w-full',s.aspect,s.fit,s.shadow,s.borderWidth,s.borderStyle,borderColor,opacity,this.imageMaskClass].filter(Boolean).join(' ');
             }
+            if (this.genre === 'imageFilter') {
+                return [s.width,'max-w-full',`brightness-[${s.brightness}%]`,`contrast-[${s.contrast}%]`,`saturate-[${s.saturation}%]`,`grayscale-[${s.grayscale}%]`,`sepia-[${s.sepia}%]`,`hue-rotate-[${s.hue}deg]`,`blur-[${s.blur}px]`,`invert-[${s.invert}%]`].join(' ');
+            }
             if (this.genre === 'block') {
                 const opacity = `opacity-[${Math.min(100, Math.max(0, Number(s.opacity) || 0)) / 100}]`;
                 const background = `bg-[${s.background}]`;
@@ -343,6 +367,7 @@ const app = createApp({
             const s = this.settings[this.genre];
             if (this.genre === 'text') return { color: s.color };
             if (this.genre === 'image') return { ...this.imageMaskStyle, borderColor: s.borderColor };
+            if (this.genre === 'imageFilter') return { filter: `brightness(${s.brightness}%) contrast(${s.contrast}%) saturate(${s.saturation}%) grayscale(${s.grayscale}%) sepia(${s.sepia}%) hue-rotate(${s.hue}deg) blur(${s.blur}px) invert(${s.invert}%)` };
             if (this.genre === 'block') return { backgroundColor: s.background, color: s.color, borderColor: s.borderColor };
             return {};
         },
@@ -367,6 +392,7 @@ const app = createApp({
             const s = this.settings[this.genre];
             if (this.genre === 'text') return `<p class="${this.generatedClasses}" style="color: ${s.color}">\n  ${esc(s.content)}\n</p>`;
             if (this.genre === 'image') return `<img\n  src="${esc(s.src)}"\n  alt="${esc(s.alt)}"\n  class="${this.generatedClasses}"\n>`;
+            if (this.genre === 'imageFilter') return `<img\n  src="${esc(s.src)}"\n  alt="${esc(s.alt)}"\n  class="${this.generatedClasses}"\n>`;
             if (this.genre === 'block') return `<div class="${this.generatedClasses}">\n  ${esc(s.content)}\n</div>`;
             const child = Array.from({length:s.columns},(_,i) => `  <div class="rounded-md p-6">Item ${i+1}</div>`).join('\n');
             return `<div class="${this.generatedClasses}">\n${child}\n</div>`;
@@ -409,6 +435,11 @@ app.component('color-field', {
     props: ['label','modelValue'],
     emits: ['update:modelValue'],
     template: `<label class="block"><span class="mb-2 block text-sm font-semibold">{{ label }}</span><span class="flex h-10 items-center gap-2 rounded-md border border-slate-300 bg-white px-2"><input type="color" :value="modelValue" @input="$emit('update:modelValue',$event.target.value)" class="h-6 w-7 cursor-pointer"><span class="font-mono text-xs text-slate-600">{{ modelValue }}</span></span></label>`
+});
+app.component('range-field', {
+    props: ['label','modelValue','min','max','step','suffix'],
+    emits: ['update:modelValue'],
+    template: `<label class="block"><span class="mb-2 flex items-center justify-between gap-3"><span class="text-sm font-semibold">{{ label }}</span><span class="rounded bg-slate-100 px-2 py-0.5 text-xs font-bold">{{ modelValue }}{{ suffix }}</span></span><input type="range" :value="modelValue" :min="min" :max="max" :step="step" @input="$emit('update:modelValue',Number($event.target.value))" class="w-full"></label>`
 });
 app.component('toggle-field', {
     props: ['label','modelValue'],
