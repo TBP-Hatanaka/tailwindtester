@@ -4,6 +4,7 @@ $genres = [
     'image' => ['label' => '画像変形', 'icon' => 'scan'],
     'imageFilter' => ['label' => '画像フィルター', 'icon' => 'sliders-horizontal'],
     'block' => ['label' => 'ブロック', 'icon' => 'square'],
+    'table' => ['label' => 'テーブル', 'icon' => 'table-2'],
     'layout' => ['label' => 'レイアウト', 'icon' => 'columns-3'],
 ];
 ?>
@@ -232,6 +233,43 @@ $genres = [
                         </div>
                     </template>
 
+                    <template v-if="genre === 'table'">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <div class="mb-2 flex items-center justify-between"><label class="text-sm font-semibold">行数</label><span class="rounded bg-slate-100 px-2 py-0.5 text-xs font-bold">{{ settings.table.rows }}</span></div>
+                                <input v-model.number="settings.table.rows" type="range" min="1" max="10" step="1" class="w-full">
+                            </div>
+                            <div>
+                                <div class="mb-2 flex items-center justify-between"><label class="text-sm font-semibold">列数</label><span class="rounded bg-slate-100 px-2 py-0.5 text-xs font-bold">{{ settings.table.columns }}</span></div>
+                                <input v-model.number="settings.table.columns" type="range" min="1" max="8" step="1" class="w-full">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <select-field label="横幅" v-model="settings.table.width" :options="options.tableWidth"></select-field>
+                            <select-field label="セル余白" v-model="settings.table.padding" :options="options.tablePadding"></select-field>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <select-field label="文字配置" v-model="settings.table.align" :options="options.tableAlignment"></select-field>
+                            <select-field label="影" v-model="settings.table.shadow" :options="options.blockShadow"></select-field>
+                        </div>
+                        <toggle-field label="見出し行を表示" v-model="settings.table.header"></toggle-field>
+                        <div class="grid grid-cols-2 gap-3">
+                            <select-field label="枠線の太さ" v-model="settings.table.borderWidth" :options="options.tableBorderWidth"></select-field>
+                            <select-field label="枠線の種類" v-model="settings.table.borderStyle" :options="options.blockBorderStyle"></select-field>
+                        </div>
+                        <color-field label="枠線の色" v-model="settings.table.borderColor"></color-field>
+                        <div class="grid grid-cols-2 gap-3">
+                            <color-field label="見出し背景" v-model="settings.table.headerBackground"></color-field>
+                            <color-field label="見出し文字" v-model="settings.table.headerColor"></color-field>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <color-field label="セル背景" v-model="settings.table.cellBackground"></color-field>
+                            <color-field label="セル文字" v-model="settings.table.cellColor"></color-field>
+                        </div>
+                        <toggle-field label="行を交互色にする" v-model="settings.table.striped"></toggle-field>
+                        <color-field v-if="settings.table.striped" label="交互行の背景色" v-model="settings.table.stripeColor"></color-field>
+                    </template>
+
                     <template v-if="genre === 'layout'">
                         <div>
                             <div class="mb-2 flex items-center justify-between"><label class="text-sm font-semibold">カラム数</label><span class="rounded bg-slate-100 px-2 py-0.5 text-xs font-bold">{{ settings.layout.columns }}</span></div>
@@ -257,6 +295,18 @@ $genres = [
                             <img v-if="genre === 'image'" :src="settings.image.src" :alt="settings.image.alt" :class="generatedClasses" :style="generatedStyle">
                             <img v-if="genre === 'imageFilter'" :src="settings.imageFilter.src" :alt="settings.imageFilter.alt" :class="generatedClasses" :style="generatedStyle">
                             <div v-if="genre === 'block'" :class="generatedClasses" :style="generatedStyle">{{ settings.block.content }}</div>
+                            <div v-if="genre === 'table'" class="w-full overflow-x-auto p-1">
+                                <table :class="tableClasses" class="mx-auto">
+                                    <thead v-if="settings.table.header" :style="{backgroundColor: settings.table.headerBackground, color: settings.table.headerColor}">
+                                        <tr><th v-for="column in settings.table.columns" :key="column" :class="tableCellClasses">見出し {{ column }}</th></tr>
+                                    </thead>
+                                    <tbody :style="{color: settings.table.cellColor}">
+                                        <tr v-for="row in settings.table.rows" :key="row" :style="{backgroundColor: settings.table.striped && row % 2 === 0 ? settings.table.stripeColor : settings.table.cellBackground}">
+                                            <td v-for="column in settings.table.columns" :key="column" :class="tableCellClasses">セル {{ row }}-{{ column }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                             <div v-if="genre === 'layout'" :class="generatedClasses" class="w-full">
                                 <div v-for="n in settings.layout.columns" :key="n" class="grid min-h-24 place-items-center rounded-md font-bold text-white" :style="{backgroundColor: settings.layout.color, opacity: 1 - ((n - 1) * .12)}">Item {{ n }}</div>
                             </div>
@@ -288,6 +338,7 @@ const defaults = {
     image: { src: 'https://tbpdigital.jp/wp-content/uploads/2026/05/service_02.png', alt: 'サービスイメージ', sizeMode: 'preset', width: 'w-96', widthValue: 480, widthUnit: 'px', aspect: 'aspect-auto', fit: 'object-cover', shadow: 'shadow-xl', borderWidth: '', borderStyle: 'border-solid', borderColor: '#0f766e', opacity: 100, mask: 'none' },
     imageFilter: { src: 'https://tbpdigital.jp/wp-content/uploads/2026/05/service_02.png', alt: 'フィルター適用イメージ', width: 'w-96', brightness: 100, contrast: 100, saturation: 100, grayscale: 0, sepia: 0, hue: 0, blur: 0, invert: 0 },
     block: { content: 'ブロックコンテンツ', width: 'w-80', height: 'min-h-40', background: '#0f766e', color: '#ffffff', padding: 'p-6', radius: 'rounded-md', shadow: 'shadow-lg', borderWidth: '', borderStyle: 'border-solid', borderColor: '#134e4a', alignment: 'items-center justify-center text-center', opacity: 100 },
+    table: { rows: 4, columns: 3, width: 'w-full', padding: 'px-4 py-3', align: 'text-left', shadow: 'shadow-md', header: true, borderWidth: 'border', borderStyle: 'border-solid', borderColor: '#cbd5e1', headerBackground: '#0f766e', headerColor: '#ffffff', cellBackground: '#ffffff', cellColor: '#334155', striped: true, stripeColor: '#f1f5f9' },
     layout: { columns: 3, gap: 'gap-4', align: 'items-stretch', color: '#0f766e', responsive: true }
 };
 
@@ -314,6 +365,10 @@ const options = {
     blockBorderWidth: [['','なし'],['border','1px'],['border-2','2px'],['border-4','4px'],['border-8','8px']],
     blockBorderStyle: [['border-solid','実線'],['border-dashed','破線'],['border-dotted','点線'],['border-double','二重線']],
     blockAlignment: [['items-start justify-start text-left','左上'],['items-center justify-center text-center','中央'],['items-end justify-end text-right','右下']],
+    tableWidth: [['w-auto','内容に合わせる'],['w-3/4','75%'],['w-full','100%']],
+    tablePadding: [['px-2 py-1','狭い'],['px-4 py-3','標準'],['px-6 py-4','広い']],
+    tableAlignment: [['text-left','左揃え'],['text-center','中央揃え'],['text-right','右揃え']],
+    tableBorderWidth: [['border-0','なし'],['border','1px'],['border-2','2px'],['border-4','4px']],
     gap: [['gap-2','狭い'],['gap-4','標準'],['gap-6','広い'],['gap-8','とても広い']],
     items: [['items-start','上'],['items-center','中央'],['items-end','下'],['items-stretch','伸ばす']]
 };
@@ -333,8 +388,8 @@ const app = createApp({
         ]
     }),
     computed: {
-        genreLabel() { return {text:'Typography',image:'Image transform',imageFilter:'Image filter',block:'Block style',layout:'Layout'}[this.genre]; },
-        genreTitle() { return {text:'テキストを装飾',image:'画像を変形',imageFilter:'画像にフィルターを適用',block:'ブロックを装飾',layout:'グリッドを構成'}[this.genre]; },
+        genreLabel() { return {text:'Typography',image:'Image transform',imageFilter:'Image filter',block:'Block style',table:'Table style',layout:'Layout'}[this.genre]; },
+        genreTitle() { return {text:'テキストを装飾',image:'画像を変形',imageFilter:'画像にフィルターを適用',block:'ブロックを装飾',table:'テーブルを装飾',layout:'グリッドを構成'}[this.genre]; },
         viewportWidth() { return {mobile:'375px',tablet:'768px',desktop:'100%'}[this.viewport]; },
         previewFrameStyle() { return { width: this.viewportWidth, maxWidth: '100%' }; },
         generatedClasses() {
@@ -361,7 +416,16 @@ const app = createApp({
                 const borderColor = s.borderWidth ? `border-[${s.borderColor}]` : '';
                 return ['flex','max-w-full',s.width,s.height,s.padding,s.radius,s.shadow,s.borderWidth,s.borderStyle,borderColor,background,color,s.alignment,opacity,'whitespace-pre-line'].filter(Boolean).join(' ');
             }
+            if (this.genre === 'table') return this.tableClasses;
             return ['grid',s.responsive?'grid-cols-1 sm:grid-cols-'+s.columns:'grid-cols-'+s.columns,s.gap,s.align].join(' ');
+        },
+        tableClasses() {
+            const s = this.settings.table;
+            return ['border-collapse','overflow-hidden',s.width,s.shadow].join(' ');
+        },
+        tableCellClasses() {
+            const s = this.settings.table;
+            return [s.padding,s.align,s.borderWidth,s.borderStyle,`border-[${s.borderColor}]`,'text-sm'].filter(Boolean).join(' ');
         },
         generatedStyle() {
             const s = this.settings[this.genre];
@@ -394,6 +458,11 @@ const app = createApp({
             if (this.genre === 'image') return `<img\n  src="${esc(s.src)}"\n  alt="${esc(s.alt)}"\n  class="${this.generatedClasses}"\n>`;
             if (this.genre === 'imageFilter') return `<img\n  src="${esc(s.src)}"\n  alt="${esc(s.alt)}"\n  class="${this.generatedClasses}"\n>`;
             if (this.genre === 'block') return `<div class="${this.generatedClasses}">\n  ${esc(s.content)}\n</div>`;
+            if (this.genre === 'table') {
+                const header = s.header ? `\n  <thead class="bg-[${s.headerBackground}] text-[${s.headerColor}]">\n    <tr>\n${Array.from({length:s.columns},(_,i) => `      <th class="${this.tableCellClasses}">見出し ${i + 1}</th>`).join('\n')}\n    </tr>\n  </thead>` : '';
+                const rows = Array.from({length:s.rows},(_,row) => `    <tr${s.striped ? ` class="even:bg-[${s.stripeColor}]"` : ''}>\n${Array.from({length:s.columns},(_,column) => `      <td class="${this.tableCellClasses}">セル ${row + 1}-${column + 1}</td>`).join('\n')}\n    </tr>`).join('\n');
+                return `<table class="${this.tableClasses} bg-[${s.cellBackground}] text-[${s.cellColor}]">${header}\n  <tbody>\n${rows}\n  </tbody>\n</table>`;
+            }
             const child = Array.from({length:s.columns},(_,i) => `  <div class="rounded-md p-6">Item ${i+1}</div>`).join('\n');
             return `<div class="${this.generatedClasses}">\n${child}\n</div>`;
         }
