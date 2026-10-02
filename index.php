@@ -6,6 +6,7 @@ $genres = [
     'block' => ['label' => 'ブロック', 'icon' => 'square'],
     'table' => ['label' => 'テーブル', 'icon' => 'table-2'],
     'layout' => ['label' => 'レイアウト', 'icon' => 'columns-3'],
+    'page' => ['label' => 'ページ', 'icon' => 'panel-top'],
 ];
 ?>
 <!doctype html>
@@ -300,6 +301,26 @@ $genres = [
                         <color-field label="アイテム色" v-model="settings.layout.color"></color-field>
                         <toggle-field label="モバイルで1列" v-model="settings.layout.responsive"></toggle-field>
                     </template>
+
+                    <template v-if="genre === 'page'">
+                        <field-label label="ページタイトル">
+                            <input v-model="settings.page.title" class="control w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+                        </field-label>
+                        <field-label label="背景画像URL">
+                            <textarea v-model="settings.page.backgroundImage" rows="3" placeholder="https://example.com/background.jpg" class="control w-full resize-none break-all rounded-md border border-slate-300 px-3 py-2 text-sm"></textarea>
+                        </field-label>
+                        <color-field label="背景色" v-model="settings.page.backgroundColor"></color-field>
+                        <div class="grid grid-cols-2 gap-3">
+                            <select-field label="表示位置" v-model="settings.page.backgroundPosition" :options="options.backgroundPosition"></select-field>
+                            <select-field label="画像サイズ" v-model="settings.page.backgroundSize" :options="options.backgroundSize"></select-field>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <select-field label="繰り返し" v-model="settings.page.backgroundRepeat" :options="options.backgroundRepeat"></select-field>
+                            <select-field label="固定方法" v-model="settings.page.backgroundAttachment" :options="options.backgroundAttachment"></select-field>
+                        </div>
+                        <select-field label="背景の合成方法" v-model="settings.page.backgroundBlend" :options="options.backgroundBlend"></select-field>
+                        <select-field label="ページの高さ" v-model="settings.page.minHeight" :options="options.pageHeight"></select-field>
+                    </template>
                 </div>
             </aside>
 
@@ -333,6 +354,13 @@ $genres = [
                             <div v-if="genre === 'layout'" :class="generatedClasses" class="w-full">
                                 <div v-for="n in settings.layout.columns" :key="n" class="grid min-h-24 place-items-center rounded-md font-bold text-white" :style="{backgroundColor: settings.layout.color, opacity: 1 - ((n - 1) * .12)}">Item {{ n }}</div>
                             </div>
+                            <section v-if="genre === 'page'" :class="generatedClasses" :style="generatedStyle">
+                                <div class="mx-auto max-w-xl px-6 py-16 text-center text-white">
+                                    <p class="text-xs font-bold uppercase tracking-widest opacity-80">Page preview</p>
+                                    <h3 class="mt-3 text-3xl font-bold">{{ settings.page.title }}</h3>
+                                    <p class="mt-4 text-sm leading-7">背景画像と背景色の組み合わせを確認できます。</p>
+                                </div>
+                            </section>
                         </div>
                     </div>
                 </div>
@@ -362,7 +390,8 @@ const defaults = {
     imageFilter: { src: 'https://tbpdigital.jp/wp-content/uploads/2026/05/service_02.png', alt: 'フィルター適用イメージ', width: 'w-96', brightness: 100, contrast: 100, saturation: 100, grayscale: 0, sepia: 0, hue: 0, blur: 0, invert: 0 },
     block: { content: 'ブロックコンテンツ', width: 'w-80', height: 'min-h-40', background: '#0f766e', color: '#ffffff', padding: 'p-6', radius: 'rounded-md', shadow: 'shadow-lg', borderWidth: '', borderStyle: 'border-solid', borderColor: '#134e4a', alignment: 'items-center justify-center text-center', opacity: 100 },
     table: { rows: 4, columns: 3, width: 'w-full', padding: 'px-4 py-3', align: 'text-left', shadow: 'shadow-md', header: true, borderWidth: 'border', borderStyle: 'border-solid', borderColor: '#cbd5e1', headerBackground: '#0f766e', headerColor: '#ffffff', cellBackground: '#ffffff', cellColor: '#334155', striped: true, stripeColor: '#f1f5f9' },
-    layout: { columns: 3, gap: 'gap-4', align: 'items-stretch', color: '#0f766e', responsive: true }
+    layout: { columns: 3, gap: 'gap-4', align: 'items-stretch', color: '#0f766e', responsive: true },
+    page: { title: 'ページタイトル', backgroundImage: 'https://tbpdigital.jp/wp-content/uploads/2026/05/service_02.png', backgroundColor: '#0f766e', backgroundPosition: 'bg-center', backgroundSize: 'bg-cover', backgroundRepeat: 'bg-no-repeat', backgroundAttachment: 'bg-scroll', backgroundBlend: 'bg-blend-multiply', minHeight: 'min-h-80' }
 };
 
 const options = {
@@ -397,6 +426,12 @@ const options = {
     tablePadding: [['px-2 py-1','狭い'],['px-4 py-3','標準'],['px-6 py-4','広い']],
     tableAlignment: [['text-left','左揃え'],['text-center','中央揃え'],['text-right','右揃え']],
     tableBorderWidth: [['border-0','なし'],['border','1px'],['border-2','2px'],['border-4','4px']],
+    backgroundPosition: [['bg-center','中央'],['bg-top','上'],['bg-bottom','下'],['bg-left','左'],['bg-right','右'],['bg-left-top','左上'],['bg-right-top','右上'],['bg-left-bottom','左下'],['bg-right-bottom','右下']],
+    backgroundSize: [['bg-auto','元のサイズ'],['bg-cover','領域を覆う'],['bg-contain','画像全体を表示']],
+    backgroundRepeat: [['bg-no-repeat','繰り返さない'],['bg-repeat','繰り返す'],['bg-repeat-x','横方向'],['bg-repeat-y','縦方向'],['bg-repeat-round','領域に合わせる'],['bg-repeat-space','間隔を空ける']],
+    backgroundAttachment: [['bg-scroll','ページと一緒に移動'],['bg-fixed','画面に固定'],['bg-local','要素内で移動']],
+    backgroundBlend: [['bg-blend-normal','通常'],['bg-blend-multiply','乗算'],['bg-blend-screen','スクリーン'],['bg-blend-overlay','オーバーレイ'],['bg-blend-darken','比較（暗）'],['bg-blend-lighten','比較（明）'],['bg-blend-luminosity','輝度']],
+    pageHeight: [['min-h-64','低い'],['min-h-80','標準'],['min-h-96','高い'],['min-h-screen','画面いっぱい']],
     gap: [['gap-2','狭い'],['gap-4','標準'],['gap-6','広い'],['gap-8','とても広い']],
     items: [['items-start','上'],['items-center','中央'],['items-end','下'],['items-stretch','伸ばす']]
 };
@@ -416,8 +451,8 @@ const app = createApp({
         ]
     }),
     computed: {
-        genreLabel() { return {text:'Typography',image:'Image transform',imageFilter:'Image filter',block:'Block style',table:'Table style',layout:'Layout'}[this.genre]; },
-        genreTitle() { return {text:'テキストを装飾',image:'画像を変形',imageFilter:'画像にフィルターを適用',block:'ブロックを装飾',table:'テーブルを装飾',layout:'グリッドを構成'}[this.genre]; },
+        genreLabel() { return {text:'Typography',image:'Image transform',imageFilter:'Image filter',block:'Block style',table:'Table style',layout:'Layout',page:'Page background'}[this.genre]; },
+        genreTitle() { return {text:'テキストを装飾',image:'画像を変形',imageFilter:'画像にフィルターを適用',block:'ブロックを装飾',table:'テーブルを装飾',layout:'グリッドを構成',page:'ページ背景を装飾'}[this.genre]; },
         viewportWidth() { return {mobile:'375px',tablet:'768px',desktop:'100%'}[this.viewport]; },
         previewFrameStyle() { return { width: this.viewportWidth, maxWidth: '100%' }; },
         textListItems() { return String(this.settings.text.content).split(/\r?\n/); },
@@ -448,6 +483,10 @@ const app = createApp({
                 return ['flex','max-w-full',s.width,s.height,s.padding,s.radius,s.shadow,s.borderWidth,s.borderStyle,borderColor,background,color,s.alignment,opacity,'whitespace-pre-line'].filter(Boolean).join(' ');
             }
             if (this.genre === 'table') return this.tableClasses;
+            if (this.genre === 'page') {
+                const backgroundImage = s.backgroundImage ? `bg-[url('${this.cssUrl(s.backgroundImage)}')]` : '';
+                return ['w-full','overflow-hidden',s.minHeight,`bg-[${s.backgroundColor}]`,backgroundImage,s.backgroundPosition,s.backgroundSize,s.backgroundRepeat,s.backgroundAttachment,s.backgroundBlend].filter(Boolean).join(' ');
+            }
             return ['grid',s.responsive?'grid-cols-1 sm:grid-cols-'+s.columns:'grid-cols-'+s.columns,s.gap,s.align].join(' ');
         },
         tableClasses() {
@@ -468,6 +507,7 @@ const app = createApp({
             if (this.genre === 'image') return { ...this.imageMaskStyle, borderColor: s.borderColor };
             if (this.genre === 'imageFilter') return { filter: `brightness(${s.brightness}%) contrast(${s.contrast}%) saturate(${s.saturation}%) grayscale(${s.grayscale}%) sepia(${s.sepia}%) hue-rotate(${s.hue}deg) blur(${s.blur}px) invert(${s.invert}%)` };
             if (this.genre === 'block') return { backgroundColor: s.background, color: s.color, borderColor: s.borderColor };
+            if (this.genre === 'page') return { backgroundColor: s.backgroundColor, backgroundImage: s.backgroundImage ? `url("${this.cssUrl(s.backgroundImage)}")` : 'none' };
             return {};
         },
         imageMaskClass() {
@@ -508,6 +548,7 @@ const app = createApp({
                 const rows = Array.from({length:s.rows},(_,row) => `    <tr${s.striped ? ` class="even:bg-[${s.stripeColor}]"` : ''}>\n${Array.from({length:s.columns},(_,column) => `      <td class="${this.tableCellClasses}">セル ${row + 1}-${column + 1}</td>`).join('\n')}\n    </tr>`).join('\n');
                 return `<table class="${this.tableClasses} bg-[${s.cellBackground}] text-[${s.cellColor}]">${header}\n  <tbody>\n${rows}\n  </tbody>\n</table>`;
             }
+            if (this.genre === 'page') return `<section class="${this.generatedClasses}">\n  <div class="mx-auto max-w-xl px-6 py-16 text-center text-white">\n    <h1 class="text-3xl font-bold">${esc(s.title)}</h1>\n  </div>\n</section>`;
             const child = Array.from({length:s.columns},(_,i) => `  <div class="rounded-md p-6">Item ${i+1}</div>`).join('\n');
             return `<div class="${this.generatedClasses}">\n${child}\n</div>`;
         }
@@ -522,7 +563,7 @@ const app = createApp({
         selectGenre(value) { this.genre = value; this.refreshIcons(); },
         resetCurrent() {
             const current = this.settings[this.genre];
-            const contentKeys = ['content', 'src', 'alt'];
+            const contentKeys = ['content', 'src', 'alt', 'title', 'body', 'backgroundImage'];
             const preserved = Object.fromEntries(contentKeys.filter(key => key in current).map(key => [key, current[key]]));
             this.settings[this.genre] = { ...JSON.parse(JSON.stringify(defaults[this.genre])), ...preserved };
             this.showToast('装飾設定をリセットしました');
