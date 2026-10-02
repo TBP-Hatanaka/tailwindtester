@@ -142,6 +142,18 @@ $genres = [
                             <toggle-field label="斜体" v-model="settings.text.italic"></toggle-field>
                             <toggle-field label="下線" v-model="settings.text.underline"></toggle-field>
                         </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <toggle-field label="リスト" v-model="settings.text.isList"></toggle-field>
+                        </div>
+                        <div v-if="settings.text.isList" class="space-y-4 border-t border-slate-200 pt-4">
+                            <field-label label="マーカー画像URL（任意）">
+                                <input v-model="settings.text.listImage" type="url" placeholder="https://example.com/marker.png" class="control w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+                            </field-label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <select-field label="マーカー位置" v-model="settings.text.listPosition" :options="options.listPosition"></select-field>
+                                <select-field label="マーカー種類" v-model="settings.text.listType" :options="options.listType"></select-field>
+                            </div>
+                        </div>
                     </template>
 
                     <template v-if="genre === 'image'">
@@ -291,7 +303,10 @@ $genres = [
                     </div>
                     <div class="checkerboard min-h-[430px] overflow-auto p-4 sm:p-8">
                         <div :style="previewFrameStyle" class="mx-auto flex min-h-[360px] items-center justify-center overflow-hidden bg-white p-5 shadow-sm transition-all duration-300 sm:p-10">
-                            <div v-if="genre === 'text'" :class="generatedClasses" :style="generatedStyle">{{ settings.text.content }}</div>
+                            <ul v-if="genre === 'text' && settings.text.isList" :class="generatedClasses" :style="generatedStyle">
+                                <li v-for="(item, index) in textListItems" :key="index">{{ item }}</li>
+                            </ul>
+                            <div v-if="genre === 'text' && !settings.text.isList" :class="generatedClasses" :style="generatedStyle">{{ settings.text.content }}</div>
                             <img v-if="genre === 'image'" :src="settings.image.src" :alt="settings.image.alt" :class="generatedClasses" :style="generatedStyle">
                             <img v-if="genre === 'imageFilter'" :src="settings.imageFilter.src" :alt="settings.imageFilter.alt" :class="generatedClasses" :style="generatedStyle">
                             <div v-if="genre === 'block'" :class="generatedClasses" :style="generatedStyle">{{ settings.block.content }}</div>
@@ -334,7 +349,7 @@ $genres = [
 const { createApp, nextTick } = Vue;
 
 const defaults = {
-    text: { content: 'デザインを、もっと自由に。', sizeMode: 'preset', size: 'text-4xl', sizeValue: 36, sizeUnit: 'px', family: 'font-sans', weightMode: 'preset', weight: 'font-bold', weightValue: 700, align: 'text-center', leadingMode: 'preset', leading: 'leading-tight', leadingValue: 1.25, leadingUnit: '', tracking: 'tracking-normal', wordBreak: 'break-normal', color: '#0f172a', italic: false, underline: false },
+    text: { content: 'デザインを、もっと自由に。', sizeMode: 'preset', size: 'text-4xl', sizeValue: 36, sizeUnit: 'px', family: 'font-sans', weightMode: 'preset', weight: 'font-bold', weightValue: 700, align: 'text-center', leadingMode: 'preset', leading: 'leading-tight', leadingValue: 1.25, leadingUnit: '', tracking: 'tracking-normal', wordBreak: 'break-normal', color: '#0f172a', italic: false, underline: false, isList: false, listImage: '', listPosition: 'list-outside', listType: 'list-disc' },
     image: { src: 'https://tbpdigital.jp/wp-content/uploads/2026/05/service_02.png', alt: 'サービスイメージ', sizeMode: 'preset', width: 'w-96', widthValue: 480, widthUnit: 'px', aspect: 'aspect-auto', fit: 'object-cover', shadow: 'shadow-xl', borderWidth: '', borderStyle: 'border-solid', borderColor: '#0f766e', opacity: 100, mask: 'none' },
     imageFilter: { src: 'https://tbpdigital.jp/wp-content/uploads/2026/05/service_02.png', alt: 'フィルター適用イメージ', width: 'w-96', brightness: 100, contrast: 100, saturation: 100, grayscale: 0, sepia: 0, hue: 0, blur: 0, invert: 0 },
     block: { content: 'ブロックコンテンツ', width: 'w-80', height: 'min-h-40', background: '#0f766e', color: '#ffffff', padding: 'p-6', radius: 'rounded-md', shadow: 'shadow-lg', borderWidth: '', borderStyle: 'border-solid', borderColor: '#134e4a', alignment: 'items-center justify-center text-center', opacity: 100 },
@@ -352,6 +367,8 @@ const options = {
     leading: [['leading-none','詰める'],['leading-tight','狭い'],['leading-normal','標準'],['leading-relaxed','広い']],
     tracking: [['tracking-tighter','かなり狭い'],['tracking-tight','狭い'],['tracking-normal','標準'],['tracking-wide','広い'],['tracking-wider','かなり広い'],['tracking-widest','最大']],
     wordBreak: [['break-normal','通常'],['break-keep','単語を分割しない'],['break-words','必要な場合のみ'],['break-all','文字単位']],
+    listPosition: [['list-outside','外側'],['list-inside','内側']],
+    listType: [['list-disc','黒丸'],['list-[circle]','白丸'],['list-[square]','四角'],['list-decimal','数字'],['list-[decimal-leading-zero]','0付き数字'],['list-[lower-alpha]','小文字アルファベット'],['list-[upper-alpha]','大文字アルファベット'],['list-[lower-roman]','小文字ローマ数字'],['list-[upper-roman]','大文字ローマ数字'],['list-none','なし']],
     imageWidth: [['w-48','小（192px）'],['w-64','中（256px）'],['w-96','大（384px）'],['w-full','横幅いっぱい']],
     imageAspect: [['aspect-auto','元画像'],['aspect-square','正方形'],['aspect-video','16:9'],['aspect-[4/3]','4:3']],
     imageFit: [['object-cover','範囲を覆う'],['object-contain','全体を表示'],['object-fill','範囲に合わせる']],
@@ -392,13 +409,15 @@ const app = createApp({
         genreTitle() { return {text:'テキストを装飾',image:'画像を変形',imageFilter:'画像にフィルターを適用',block:'ブロックを装飾',table:'テーブルを装飾',layout:'グリッドを構成'}[this.genre]; },
         viewportWidth() { return {mobile:'375px',tablet:'768px',desktop:'100%'}[this.viewport]; },
         previewFrameStyle() { return { width: this.viewportWidth, maxWidth: '100%' }; },
+        textListItems() { return String(this.settings.text.content).split(/\r?\n/); },
         generatedClasses() {
             const s = this.settings[this.genre];
             if (this.genre === 'text') {
                 const size = s.sizeMode === 'custom' ? this.numericClass('text', s.sizeValue, s.sizeUnit, 0.1, 500) : s.size;
                 const weight = s.weightMode === 'custom' ? this.numericClass('font', s.weightValue, '', 100, 900) : s.weight;
                 const leading = s.leadingMode === 'custom' ? this.numericClass('leading', s.leadingValue, s.leadingUnit, 0.1, 500) : s.leading;
-                return [size,s.family,weight,s.align,leading,s.tracking,s.wordBreak,s.italic?'italic':'',s.underline?'underline':'','whitespace-pre-line'].filter(Boolean).join(' ');
+                const listImage = s.isList && s.listImage ? `list-image-[url('${this.cssUrl(s.listImage)}')]` : '';
+                return [size,s.family,weight,s.align,leading,s.tracking,s.wordBreak,s.italic?'italic':'',s.underline?'underline':'',s.isList?s.listPosition:'',s.isList?s.listType:'',listImage,s.isList?'pl-6':'','whitespace-pre-line'].filter(Boolean).join(' ');
             }
             if (this.genre === 'image') {
                 const width = s.sizeMode === 'custom' ? this.numericClass('w', s.widthValue, s.widthUnit, 1, 1600) : s.width;
@@ -429,7 +448,7 @@ const app = createApp({
         },
         generatedStyle() {
             const s = this.settings[this.genre];
-            if (this.genre === 'text') return { color: s.color };
+            if (this.genre === 'text') return { color: s.color, ...(s.isList ? { listStylePosition: s.listPosition.replace('list-', ''), listStyleType: s.listType.replace('list-[', '').replace(']', '').replace('list-', ''), listStyleImage: s.listImage ? `url("${this.cssUrl(s.listImage)}")` : 'none' } : {}) };
             if (this.genre === 'image') return { ...this.imageMaskStyle, borderColor: s.borderColor };
             if (this.genre === 'imageFilter') return { filter: `brightness(${s.brightness}%) contrast(${s.contrast}%) saturate(${s.saturation}%) grayscale(${s.grayscale}%) sepia(${s.sepia}%) hue-rotate(${s.hue}deg) blur(${s.blur}px) invert(${s.invert}%)` };
             if (this.genre === 'block') return { backgroundColor: s.background, color: s.color, borderColor: s.borderColor };
@@ -454,6 +473,10 @@ const app = createApp({
         generatedCode() {
             const esc = value => String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
             const s = this.settings[this.genre];
+            if (this.genre === 'text' && s.isList) {
+                const items = this.textListItems.map(item => `  <li>${esc(item)}</li>`).join('\n');
+                return `<ul class="${this.generatedClasses}" style="color: ${s.color}">\n${items}\n</ul>`;
+            }
             if (this.genre === 'text') return `<p class="${this.generatedClasses}" style="color: ${s.color}">\n  ${esc(s.content)}\n</p>`;
             if (this.genre === 'image') return `<img\n  src="${esc(s.src)}"\n  alt="${esc(s.alt)}"\n  class="${this.generatedClasses}"\n>`;
             if (this.genre === 'imageFilter') return `<img\n  src="${esc(s.src)}"\n  alt="${esc(s.alt)}"\n  class="${this.generatedClasses}"\n>`;
@@ -468,6 +491,7 @@ const app = createApp({
         }
     },
     methods: {
+        cssUrl(value) { return String(value).replace(/["'()\\]/g, character => `\\${character}`); },
         numericClass(prefix, value, unit, min, max) {
             const number = Number(value);
             const safeValue = Number.isFinite(number) ? Math.min(max, Math.max(min, number)) : min;
