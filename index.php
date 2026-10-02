@@ -142,6 +142,14 @@ $genres = [
                             <toggle-field label="斜体" v-model="settings.text.italic"></toggle-field>
                             <toggle-field label="下線" v-model="settings.text.underline"></toggle-field>
                         </div>
+                        <div v-if="settings.text.underline" class="space-y-4 border-t border-slate-200 pt-4">
+                            <color-field label="下線の色" v-model="settings.text.decorationColor"></color-field>
+                            <div class="grid grid-cols-2 gap-3">
+                                <select-field label="下線の種類" v-model="settings.text.decorationStyle" :options="options.decorationStyle"></select-field>
+                                <select-field label="下線の太さ" v-model="settings.text.decorationThickness" :options="options.decorationThickness"></select-field>
+                            </div>
+                            <select-field label="文字からの距離" v-model="settings.text.underlineOffset" :options="options.underlineOffset"></select-field>
+                        </div>
                         <div class="grid grid-cols-2 gap-3">
                             <toggle-field label="リスト" v-model="settings.text.isList"></toggle-field>
                         </div>
@@ -349,7 +357,7 @@ $genres = [
 const { createApp, nextTick } = Vue;
 
 const defaults = {
-    text: { content: 'デザインを、もっと自由に。', sizeMode: 'preset', size: 'text-4xl', sizeValue: 36, sizeUnit: 'px', family: 'font-sans', weightMode: 'preset', weight: 'font-bold', weightValue: 700, align: 'text-center', leadingMode: 'preset', leading: 'leading-tight', leadingValue: 1.25, leadingUnit: '', tracking: 'tracking-normal', wordBreak: 'break-normal', color: '#0f172a', italic: false, underline: false, isList: false, listImage: '', listPosition: 'list-outside', listType: 'list-disc' },
+    text: { content: 'デザインを、もっと自由に。', sizeMode: 'preset', size: 'text-4xl', sizeValue: 36, sizeUnit: 'px', family: 'font-sans', weightMode: 'preset', weight: 'font-bold', weightValue: 700, align: 'text-center', leadingMode: 'preset', leading: 'leading-tight', leadingValue: 1.25, leadingUnit: '', tracking: 'tracking-normal', wordBreak: 'break-normal', color: '#0f172a', italic: false, underline: false, decorationColor: '#0f766e', decorationStyle: 'decoration-solid', decorationThickness: 'decoration-2', underlineOffset: 'underline-offset-4', isList: false, listImage: '', listPosition: 'list-outside', listType: 'list-disc' },
     image: { src: 'https://tbpdigital.jp/wp-content/uploads/2026/05/service_02.png', alt: 'サービスイメージ', sizeMode: 'preset', width: 'w-96', widthValue: 480, widthUnit: 'px', aspect: 'aspect-auto', fit: 'object-cover', shadow: 'shadow-xl', borderWidth: '', borderStyle: 'border-solid', borderColor: '#0f766e', opacity: 100, mask: 'none' },
     imageFilter: { src: 'https://tbpdigital.jp/wp-content/uploads/2026/05/service_02.png', alt: 'フィルター適用イメージ', width: 'w-96', brightness: 100, contrast: 100, saturation: 100, grayscale: 0, sepia: 0, hue: 0, blur: 0, invert: 0 },
     block: { content: 'ブロックコンテンツ', width: 'w-80', height: 'min-h-40', background: '#0f766e', color: '#ffffff', padding: 'p-6', radius: 'rounded-md', shadow: 'shadow-lg', borderWidth: '', borderStyle: 'border-solid', borderColor: '#134e4a', alignment: 'items-center justify-center text-center', opacity: 100 },
@@ -369,6 +377,9 @@ const options = {
     wordBreak: [['break-normal','通常'],['break-keep','単語を分割しない'],['break-words','必要な場合のみ'],['break-all','文字単位']],
     listPosition: [['list-outside','外側'],['list-inside','内側']],
     listType: [['list-disc','黒丸'],['list-[circle]','白丸'],['list-[square]','四角'],['list-decimal','数字'],['list-[decimal-leading-zero]','0付き数字'],['list-[lower-alpha]','小文字アルファベット'],['list-[upper-alpha]','大文字アルファベット'],['list-[lower-roman]','小文字ローマ数字'],['list-[upper-roman]','大文字ローマ数字'],['list-none','なし']],
+    decorationStyle: [['decoration-solid','実線'],['decoration-double','二重線'],['decoration-dotted','点線'],['decoration-dashed','破線'],['decoration-wavy','波線']],
+    decorationThickness: [['decoration-auto','自動'],['decoration-from-font','フォントに合わせる'],['decoration-0','0px'],['decoration-1','1px'],['decoration-2','2px'],['decoration-4','4px'],['decoration-8','8px']],
+    underlineOffset: [['underline-offset-auto','自動'],['underline-offset-0','0px'],['underline-offset-1','1px'],['underline-offset-2','2px'],['underline-offset-4','4px'],['underline-offset-8','8px']],
     imageWidth: [['w-48','小（192px）'],['w-64','中（256px）'],['w-96','大（384px）'],['w-full','横幅いっぱい']],
     imageAspect: [['aspect-auto','元画像'],['aspect-square','正方形'],['aspect-video','16:9'],['aspect-[4/3]','4:3']],
     imageFit: [['object-cover','範囲を覆う'],['object-contain','全体を表示'],['object-fill','範囲に合わせる']],
@@ -417,7 +428,8 @@ const app = createApp({
                 const weight = s.weightMode === 'custom' ? this.numericClass('font', s.weightValue, '', 100, 900) : s.weight;
                 const leading = s.leadingMode === 'custom' ? this.numericClass('leading', s.leadingValue, s.leadingUnit, 0.1, 500) : s.leading;
                 const listImage = s.isList && s.listImage ? `list-image-[url('${this.cssUrl(s.listImage)}')]` : '';
-                return [size,s.family,weight,s.align,leading,s.tracking,s.wordBreak,s.italic?'italic':'',s.underline?'underline':'',s.isList?s.listPosition:'',s.isList?s.listType:'',listImage,s.isList?'pl-6':'','whitespace-pre-line'].filter(Boolean).join(' ');
+                const decorationColor = s.underline ? `decoration-[${s.decorationColor}]` : '';
+                return [size,s.family,weight,s.align,leading,s.tracking,s.wordBreak,s.italic?'italic':'',s.underline?'underline':'',decorationColor,s.underline?s.decorationStyle:'',s.underline?s.decorationThickness:'',s.underline?s.underlineOffset:'',s.isList?s.listPosition:'',s.isList?s.listType:'',listImage,s.isList?'pl-6':'','whitespace-pre-line'].filter(Boolean).join(' ');
             }
             if (this.genre === 'image') {
                 const width = s.sizeMode === 'custom' ? this.numericClass('w', s.widthValue, s.widthUnit, 1, 1600) : s.width;
@@ -448,7 +460,11 @@ const app = createApp({
         },
         generatedStyle() {
             const s = this.settings[this.genre];
-            if (this.genre === 'text') return { color: s.color, ...(s.isList ? { listStylePosition: s.listPosition.replace('list-', ''), listStyleType: s.listType.replace('list-[', '').replace(']', '').replace('list-', ''), listStyleImage: s.listImage ? `url("${this.cssUrl(s.listImage)}")` : 'none' } : {}) };
+            if (this.genre === 'text') return {
+                color: s.color,
+                ...(s.underline ? this.textDecorationStyle : {}),
+                ...(s.isList ? { listStylePosition: s.listPosition.replace('list-', ''), listStyleType: s.listType.replace('list-[', '').replace(']', '').replace('list-', ''), listStyleImage: s.listImage ? `url("${this.cssUrl(s.listImage)}")` : 'none' } : {})
+            };
             if (this.genre === 'image') return { ...this.imageMaskStyle, borderColor: s.borderColor };
             if (this.genre === 'imageFilter') return { filter: `brightness(${s.brightness}%) contrast(${s.contrast}%) saturate(${s.saturation}%) grayscale(${s.grayscale}%) sepia(${s.sepia}%) hue-rotate(${s.hue}deg) blur(${s.blur}px) invert(${s.invert}%)` };
             if (this.genre === 'block') return { backgroundColor: s.background, color: s.color, borderColor: s.borderColor };
@@ -463,6 +479,12 @@ const app = createApp({
                 slant: '[clip-path:polygon(12%_0%,100%_0%,88%_100%,0%_100%)]',
                 fade: '[mask-image:linear-gradient(to_bottom,black_65%,transparent)]'
             }[mask] || '';
+        },
+        textDecorationStyle() {
+            const s = this.settings.text;
+            const thickness = { 'decoration-auto':'auto', 'decoration-from-font':'from-font', 'decoration-0':'0px', 'decoration-1':'1px', 'decoration-2':'2px', 'decoration-4':'4px', 'decoration-8':'8px' }[s.decorationThickness];
+            const offset = { 'underline-offset-auto':'auto', 'underline-offset-0':'0px', 'underline-offset-1':'1px', 'underline-offset-2':'2px', 'underline-offset-4':'4px', 'underline-offset-8':'8px' }[s.underlineOffset];
+            return { textDecorationColor: s.decorationColor, textDecorationStyle: s.decorationStyle.replace('decoration-', ''), textDecorationThickness: thickness, textUnderlineOffset: offset };
         },
         imageMaskStyle() {
             const mask = this.settings.image.mask;
