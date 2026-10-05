@@ -7,6 +7,7 @@ $genres = [
     'table' => ['label' => 'テーブル', 'icon' => 'table-2'],
     'layout' => ['label' => 'レイアウト', 'icon' => 'columns-3'],
     'page' => ['label' => 'ページ', 'icon' => 'panel-top'],
+    'converter' => ['label' => 'CSS変換', 'icon' => 'repeat-2'],
 ];
 ?>
 <!doctype html>
@@ -321,6 +322,19 @@ $genres = [
                         <select-field label="背景の合成方法" v-model="settings.page.backgroundBlend" :options="options.backgroundBlend"></select-field>
                         <select-field label="ページの高さ" v-model="settings.page.minHeight" :options="options.pageHeight"></select-field>
                     </template>
+
+                    <template v-if="genre === 'converter'">
+                        <field-label label="Tailwind HTML">
+                            <textarea v-model="settings.converter.content" rows="14" spellcheck="false" class="control w-full resize-y rounded-md border border-slate-300 px-3 py-2 font-mono text-xs leading-5"></textarea>
+                        </field-label>
+                        <button type="button" @click="convertTailwind" class="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-teal-700 px-4 text-sm font-bold text-white transition hover:bg-teal-800">
+                            <i data-lucide="repeat-2" class="h-4 w-4"></i>style属性へ変換
+                        </button>
+                        <div class="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs">
+                            <span class="font-semibold text-slate-600">変換状況</span>
+                            <span :class="converterUnsupported.length ? 'text-amber-700' : 'text-emerald-700'" class="font-bold">{{ converterStatus }}</span>
+                        </div>
+                    </template>
                 </div>
             </aside>
 
@@ -361,6 +375,7 @@ $genres = [
                                     <p class="mt-4 text-sm leading-7">背景画像と背景色の組み合わせを確認できます。</p>
                                 </div>
                             </section>
+                            <iframe v-if="genre === 'converter'" :srcdoc="converterPreview" title="変換後HTMLのプレビュー" sandbox="" class="h-[340px] w-full border-0 bg-white"></iframe>
                         </div>
                     </div>
                 </div>
@@ -391,7 +406,8 @@ const defaults = {
     block: { content: 'ブロックコンテンツ', width: 'w-80', height: 'min-h-40', background: '#0f766e', color: '#ffffff', padding: 'p-6', radius: 'rounded-md', shadow: 'shadow-lg', borderWidth: '', borderStyle: 'border-solid', borderColor: '#134e4a', alignment: 'items-center justify-center text-center', opacity: 100 },
     table: { rows: 4, columns: 3, width: 'w-full', padding: 'px-4 py-3', align: 'text-left', shadow: 'shadow-md', header: true, borderWidth: 'border', borderStyle: 'border-solid', borderColor: '#cbd5e1', headerBackground: '#0f766e', headerColor: '#ffffff', cellBackground: '#ffffff', cellColor: '#334155', striped: true, stripeColor: '#f1f5f9' },
     layout: { columns: 3, gap: 'gap-4', align: 'items-stretch', color: '#0f766e', responsive: true },
-    page: { title: 'ページタイトル', backgroundImage: 'https://tbpdigital.jp/wp-content/uploads/2026/05/service_02.png', backgroundColor: '#0f766e', backgroundPosition: 'bg-center', backgroundSize: 'bg-cover', backgroundRepeat: 'bg-no-repeat', backgroundAttachment: 'bg-scroll', backgroundBlend: 'bg-blend-multiply', minHeight: 'min-h-80' }
+    page: { title: 'ページタイトル', backgroundImage: 'https://tbpdigital.jp/wp-content/uploads/2026/05/service_02.png', backgroundColor: '#0f766e', backgroundPosition: 'bg-center', backgroundSize: 'bg-cover', backgroundRepeat: 'bg-no-repeat', backgroundAttachment: 'bg-scroll', backgroundBlend: 'bg-blend-multiply', minHeight: 'min-h-80' },
+    converter: { content: '<div class="bg-teal-700 p-8 rounded-lg shadow-lg text-center">\n  <h1 class="text-3xl font-bold text-white">Tailwind CSS</h1>\n  <p class="mt-3 text-sm text-white">インラインスタイルへ変換します。</p>\n</div>' }
 };
 
 const options = {
@@ -444,6 +460,8 @@ const app = createApp({
         viewport: 'desktop',
         copied: false,
         toast: '',
+        converterOutput: '',
+        converterUnsupported: [],
         viewports: [
             { id: 'mobile', label: 'モバイル', icon: 'smartphone' },
             { id: 'tablet', label: 'タブレット', icon: 'tablet' },
@@ -451,13 +469,16 @@ const app = createApp({
         ]
     }),
     computed: {
-        genreLabel() { return {text:'Typography',image:'Image transform',imageFilter:'Image filter',block:'Block style',table:'Table style',layout:'Layout',page:'Page background'}[this.genre]; },
-        genreTitle() { return {text:'テキストを装飾',image:'画像を変形',imageFilter:'画像にフィルターを適用',block:'ブロックを装飾',table:'テーブルを装飾',layout:'グリッドを構成',page:'ページ背景を装飾'}[this.genre]; },
+        genreLabel() { return {text:'Typography',image:'Image transform',imageFilter:'Image filter',block:'Block style',table:'Table style',layout:'Layout',page:'Page background',converter:'CSS converter'}[this.genre]; },
+        genreTitle() { return {text:'テキストを装飾',image:'画像を変形',imageFilter:'画像にフィルターを適用',block:'ブロックを装飾',table:'テーブルを装飾',layout:'グリッドを構成',page:'ページ背景を装飾',converter:'Tailwindをstyle属性へ変換'}[this.genre]; },
         viewportWidth() { return {mobile:'375px',tablet:'768px',desktop:'100%'}[this.viewport]; },
         previewFrameStyle() { return { width: this.viewportWidth, maxWidth: '100%' }; },
+        converterStatus() { return this.converterUnsupported.length ? `未対応 ${this.converterUnsupported.length}件` : '変換完了'; },
+        converterPreview() { return `<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;padding:24px;font-family:Arial,sans-serif}*{box-sizing:border-box}</style></head><body>${this.converterOutput}</body></html>`; },
         textListItems() { return String(this.settings.text.content).split(/\r?\n/); },
         generatedClasses() {
             const s = this.settings[this.genre];
+            if (this.genre === 'converter') return '';
             if (this.genre === 'text') {
                 const size = s.sizeMode === 'custom' ? this.numericClass('text', s.sizeValue, s.sizeUnit, 0.1, 500) : s.size;
                 const weight = s.weightMode === 'custom' ? this.numericClass('font', s.weightValue, '', 100, 900) : s.weight;
@@ -499,6 +520,7 @@ const app = createApp({
         },
         generatedStyle() {
             const s = this.settings[this.genre];
+            if (this.genre === 'converter') return {};
             if (this.genre === 'text') return {
                 color: s.color,
                 ...(s.underline ? this.textDecorationStyle : {}),
@@ -535,6 +557,7 @@ const app = createApp({
         generatedCode() {
             const esc = value => String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
             const s = this.settings[this.genre];
+            if (this.genre === 'converter') return this.converterOutput;
             if (this.genre === 'text' && s.isList) {
                 const items = this.textListItems.map(item => `  <li>${esc(item)}</li>`).join('\n');
                 return `<ul class="${this.generatedClasses}" style="color: ${s.color}">\n${items}\n</ul>`;
@@ -554,18 +577,136 @@ const app = createApp({
         }
     },
     methods: {
+        convertTailwind(notify = true) {
+            const documentNode = new DOMParser().parseFromString(this.settings.converter.content, 'text/html');
+            documentNode.querySelectorAll('script, iframe, object, embed, link, meta').forEach(node => node.remove());
+            const unsupported = new Set();
+            documentNode.body.querySelectorAll('*').forEach(element => {
+                [...element.attributes].forEach(attribute => {
+                    if (/^on/i.test(attribute.name) || (/^(href|src|action)$/i.test(attribute.name) && /^\s*javascript:/i.test(attribute.value))) element.removeAttribute(attribute.name);
+                });
+                [...element.classList].forEach(className => {
+                    const declarations = this.tailwindDeclarations(className);
+                    if (!declarations.length) unsupported.add(className);
+                    declarations.forEach(([property, value]) => {
+                        const existing = element.style.getPropertyValue(property);
+                        element.style.setProperty(property, property === 'filter' && existing ? `${existing} ${value}` : value);
+                    });
+                });
+                element.removeAttribute('class');
+            });
+            this.converterUnsupported = [...unsupported].sort();
+            this.converterOutput = documentNode.body.innerHTML.replace(/>\s*</g, '>\n<').trim();
+            if (notify) this.showToast(this.converterUnsupported.length ? '変換しました（一部未対応）' : 'style属性へ変換しました');
+            this.refreshIcons();
+        },
+        tailwindDeclarations(originalClass) {
+            if (!originalClass || originalClass.includes(':')) return [];
+            const className = originalClass.replace(/^!/, '');
+            const colors = {
+                transparent:'transparent', white:'#ffffff', black:'#000000',
+                'slate-50':'#f8fafc','slate-100':'#f1f5f9','slate-200':'#e2e8f0','slate-300':'#cbd5e1','slate-500':'#64748b','slate-600':'#475569','slate-700':'#334155','slate-800':'#1e293b','slate-900':'#0f172a','slate-950':'#020617',
+                'teal-50':'#f0fdfa','teal-100':'#ccfbf1','teal-400':'#2dd4bf','teal-500':'#14b8a6','teal-600':'#0d9488','teal-700':'#0f766e','teal-800':'#115e59','emerald-500':'#10b981','amber-700':'#b45309'
+            };
+            const exact = {
+                block:[['display','block']], inline:[['display','inline']], 'inline-block':[['display','inline-block']], flex:[['display','flex']], 'inline-flex':[['display','inline-flex']], grid:[['display','grid']], hidden:[['display','none']],
+                relative:[['position','relative']], absolute:[['position','absolute']], fixed:[['position','fixed']], sticky:[['position','sticky']],
+                'flex-row':[['flex-direction','row']], 'flex-col':[['flex-direction','column']], 'flex-wrap':[['flex-wrap','wrap']], 'flex-nowrap':[['flex-wrap','nowrap']],
+                'items-start':[['align-items','flex-start']], 'items-center':[['align-items','center']], 'items-end':[['align-items','flex-end']], 'items-stretch':[['align-items','stretch']],
+                'justify-start':[['justify-content','flex-start']], 'justify-center':[['justify-content','center']], 'justify-end':[['justify-content','flex-end']], 'justify-between':[['justify-content','space-between']], 'justify-around':[['justify-content','space-around']],
+                'text-left':[['text-align','left']], 'text-center':[['text-align','center']], 'text-right':[['text-align','right']],
+                'font-sans':[['font-family','ui-sans-serif, system-ui, sans-serif']], 'font-serif':[['font-family','ui-serif, Georgia, serif']], 'font-mono':[['font-family','ui-monospace, monospace']],
+                'font-normal':[['font-weight','400']], 'font-medium':[['font-weight','500']], 'font-semibold':[['font-weight','600']], 'font-bold':[['font-weight','700']], 'font-black':[['font-weight','900']], italic:[['font-style','italic']],
+                underline:[['text-decoration-line','underline']], 'no-underline':[['text-decoration-line','none']], uppercase:[['text-transform','uppercase']], lowercase:[['text-transform','lowercase']], capitalize:[['text-transform','capitalize']],
+                'whitespace-normal':[['white-space','normal']], 'whitespace-nowrap':[['white-space','nowrap']], 'whitespace-pre-line':[['white-space','pre-line']], 'break-keep':[['word-break','keep-all']], 'break-all':[['word-break','break-all']], 'break-words':[['overflow-wrap','break-word']],
+                'overflow-hidden':[['overflow','hidden']], 'overflow-auto':[['overflow','auto']], 'overflow-x-auto':[['overflow-x','auto']],
+                'object-cover':[['object-fit','cover']], 'object-contain':[['object-fit','contain']], 'object-fill':[['object-fit','fill']],
+                'border-collapse':[['border-collapse','collapse']], 'border-solid':[['border-style','solid']], 'border-dashed':[['border-style','dashed']], 'border-dotted':[['border-style','dotted']], 'border-double':[['border-style','double']],
+                'list-none':[['list-style-type','none']], 'list-disc':[['list-style-type','disc']], 'list-decimal':[['list-style-type','decimal']], 'list-inside':[['list-style-position','inside']], 'list-outside':[['list-style-position','outside']],
+                'bg-auto':[['background-size','auto']], 'bg-cover':[['background-size','cover']], 'bg-contain':[['background-size','contain']], 'bg-center':[['background-position','center']], 'bg-top':[['background-position','top']], 'bg-bottom':[['background-position','bottom']], 'bg-left':[['background-position','left']], 'bg-right':[['background-position','right']],
+                'bg-no-repeat':[['background-repeat','no-repeat']], 'bg-repeat':[['background-repeat','repeat']], 'bg-repeat-x':[['background-repeat','repeat-x']], 'bg-repeat-y':[['background-repeat','repeat-y']], 'bg-fixed':[['background-attachment','fixed']], 'bg-scroll':[['background-attachment','scroll']], 'bg-local':[['background-attachment','local']],
+                'bg-blend-normal':[['background-blend-mode','normal']], 'bg-blend-multiply':[['background-blend-mode','multiply']], 'bg-blend-screen':[['background-blend-mode','screen']], 'bg-blend-overlay':[['background-blend-mode','overlay']], 'bg-blend-darken':[['background-blend-mode','darken']], 'bg-blend-lighten':[['background-blend-mode','lighten']], 'bg-blend-luminosity':[['background-blend-mode','luminosity']],
+                'rounded-none':[['border-radius','0']], rounded:[['border-radius','0.25rem']], 'rounded-md':[['border-radius','0.375rem']], 'rounded-lg':[['border-radius','0.5rem']], 'rounded-full':[['border-radius','9999px']],
+                'shadow-none':[['box-shadow','none']], 'shadow-sm':[['box-shadow','0 1px 2px rgb(0 0 0 / 0.05)']], 'shadow-md':[['box-shadow','0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)']], 'shadow-lg':[['box-shadow','0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)']], 'shadow-xl':[['box-shadow','0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)']],
+                'w-full':[['width','100%']], 'w-auto':[['width','auto']], 'max-w-full':[['max-width','100%']], 'h-full':[['height','100%']], 'h-auto':[['height','auto']], 'min-h-screen':[['min-height','100vh']],
+                'max-w-sm':[['max-width','24rem']], 'max-w-md':[['max-width','28rem']], 'max-w-lg':[['max-width','32rem']], 'max-w-xl':[['max-width','36rem']], 'max-w-2xl':[['max-width','42rem']],
+                'leading-none':[['line-height','1']], 'leading-tight':[['line-height','1.25']], 'leading-normal':[['line-height','1.5']], 'leading-relaxed':[['line-height','1.625']],
+                'tracking-tighter':[['letter-spacing','-0.05em']], 'tracking-tight':[['letter-spacing','-0.025em']], 'tracking-normal':[['letter-spacing','0']], 'tracking-wide':[['letter-spacing','0.025em']], 'tracking-wider':[['letter-spacing','0.05em']], 'tracking-widest':[['letter-spacing','0.1em']]
+            };
+            if (exact[className]) return exact[className];
+            let match = className.match(/^m([trblxy]?)-auto$/);
+            if (match) {
+                const sides = { '':[''],t:['-top'],r:['-right'],b:['-bottom'],l:['-left'],x:['-left','-right'],y:['-top','-bottom'] }[match[1]];
+                return sides.map(side => ['margin' + side,'auto']);
+            }
+            const textSizes = { xs:['0.75rem','1rem'], sm:['0.875rem','1.25rem'], base:['1rem','1.5rem'], lg:['1.125rem','1.75rem'], xl:['1.25rem','1.75rem'], '2xl':['1.5rem','2rem'], '3xl':['1.875rem','2.25rem'], '4xl':['2.25rem','2.5rem'], '5xl':['3rem','1'], '6xl':['3.75rem','1'] };
+            match = className.match(/^text-(xs|sm|base|lg|xl|[2-6]xl)$/);
+            if (match) return [['font-size',textSizes[match[1]][0]],['line-height',textSizes[match[1]][1]]];
+            match = className.match(/^(bg|text|border|decoration)-(.+)$/);
+            if (match && colors[match[2]]) return [[{bg:'background-color',text:'color',border:'border-color',decoration:'text-decoration-color'}[match[1]],colors[match[2]]]];
+            match = className.match(/^(bg|text|border|decoration)-\[(.+)\]$/);
+            if (match) {
+                const value = match[2].replaceAll('_',' ');
+                if (match[1] === 'bg') return [[value.startsWith('url(') || value.startsWith('linear-gradient(') ? 'background-image' : 'background-color',value]];
+                if (match[1] === 'text') return [[/^[-\d.]+(px|pt|rem|em|%)$/.test(value) ? 'font-size' : 'color',value]];
+                return [[match[1] === 'border' ? 'border-color' : 'text-decoration-color',value]];
+            }
+            match = className.match(/^\[([^:]+):(.+)\]$/);
+            if (match) return [[match[1],match[2].replaceAll('_',' ')]];
+            match = className.match(/^(-?)([mp])([trblxy]?)-([\d.]+)$/);
+            if (match) {
+                const value = `${match[1]}${Number(match[4]) / 4}rem`;
+                const base = match[2] === 'm' ? 'margin' : 'padding';
+                const sides = { '':[''],t:['-top'],r:['-right'],b:['-bottom'],l:['-left'],x:['-left','-right'],y:['-top','-bottom'] }[match[3]];
+                return sides.map(side => [base + side,value]);
+            }
+            match = className.match(/^(w|h|min-w|max-w|min-h|max-h)-\[(.+)\]$/);
+            if (match) return [[{w:'width',h:'height','min-w':'min-width','max-w':'max-width','min-h':'min-height','max-h':'max-height'}[match[1]],match[2].replaceAll('_',' ')]];
+            match = className.match(/^(w|h|min-h)-([\d.]+)$/);
+            if (match) return [[{w:'width',h:'height','min-h':'min-height'}[match[1]],`${Number(match[2]) / 4}rem`]];
+            match = className.match(/^gap-([\d.]+)$/);
+            if (match) return [['gap',`${Number(match[1]) / 4}rem`]];
+            match = className.match(/^grid-cols-(\d+)$/);
+            if (match) return [['grid-template-columns',`repeat(${match[1]}, minmax(0, 1fr))`]];
+            match = className.match(/^border(?:-(0|2|4|8))?$/);
+            if (match) return [['border-width',`${match[1] || 1}px`]];
+            match = className.match(/^opacity-\[(.+)\]$/);
+            if (match) return [['opacity',match[1]]];
+            match = className.match(/^aspect-\[(.+)\]$/);
+            if (match) return [['aspect-ratio',match[1].replace('/',' / ')]];
+            match = className.match(/^(brightness|contrast|saturate|grayscale|sepia|invert|blur|hue-rotate)-\[(.+)\]$/);
+            if (match) return [['filter',`${match[1] === 'hue-rotate' ? 'hue-rotate' : match[1]}(${match[2]})`]];
+            match = className.match(/^font-\[(.+)\]$/);
+            if (match) return [['font-weight',match[1]]];
+            match = className.match(/^leading-\[(.+)\]$/);
+            if (match) return [['line-height',match[1]]];
+            match = className.match(/^list-\[(.+)\]$/);
+            if (match) return [['list-style-type',match[1]]];
+            match = className.match(/^decoration-(solid|double|dotted|dashed|wavy)$/);
+            if (match) return [['text-decoration-style',match[1]]];
+            match = className.match(/^decoration-(auto|from-font|0|1|2|4|8)$/);
+            if (match) return [['text-decoration-thickness',/^\d+$/.test(match[1]) ? `${match[1]}px` : match[1]]];
+            match = className.match(/^underline-offset-(auto|0|1|2|4|8)$/);
+            if (match) return [['text-underline-offset',/^\d+$/.test(match[1]) ? `${match[1]}px` : match[1]]];
+            return [];
+        },
         cssUrl(value) { return String(value).replace(/["'()\\]/g, character => `\\${character}`); },
         numericClass(prefix, value, unit, min, max) {
             const number = Number(value);
             const safeValue = Number.isFinite(number) ? Math.min(max, Math.max(min, number)) : min;
             return `${prefix}-[${safeValue}${unit}]`;
         },
-        selectGenre(value) { this.genre = value; this.refreshIcons(); },
+        selectGenre(value) {
+            this.genre = value;
+            if (value === 'converter' && !this.converterOutput) nextTick(() => this.convertTailwind(false));
+            this.refreshIcons();
+        },
         resetCurrent() {
             const current = this.settings[this.genre];
             const contentKeys = ['content', 'src', 'alt', 'title', 'body', 'backgroundImage'];
             const preserved = Object.fromEntries(contentKeys.filter(key => key in current).map(key => [key, current[key]]));
             this.settings[this.genre] = { ...JSON.parse(JSON.stringify(defaults[this.genre])), ...preserved };
+            if (this.genre === 'converter') nextTick(() => this.convertTailwind(false));
             this.showToast('装飾設定をリセットしました');
             this.refreshIcons();
         },
@@ -581,7 +722,7 @@ const app = createApp({
         showToast(message) { this.toast = message; setTimeout(() => this.toast = '', 1800); },
         refreshIcons() { nextTick(() => lucide.createIcons()); }
     },
-    mounted() { this.refreshIcons(); },
+    mounted() { this.convertTailwind(false); this.refreshIcons(); },
     updated() { this.refreshIcons(); }
 });
 
