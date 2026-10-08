@@ -132,28 +132,47 @@
     }
     .sample_port {
         width: 100%;
-        height: 100vw;
+        height: 100vh;
         top: 480px;
         position: relative;
         margin: auto;
         display: flex;
     }
-    .sample_port1 {
-        background-image: url("https://www.toyobijutsu-prt.co.jp/wp-content/uploads/2024/09/insurance_1.webp");
+    .sample_port1, .sample_port2 {
         width: 50%;
+        height: 100%;
+        box-sizing: border-box;
+        color: white;
+        text-align: center;
+        align-content: center;
+        position: relative;
+        z-index: 1;
+    }
+    .sample_port1 {
+        position: absolute;
+        left: 0;
+        background-image: url("https://www.toyobijutsu-prt.co.jp/wp-content/uploads/2024/09/insurance_1.webp");
         background-position: center;
         background-color: black;
         background-blend-mode: luminosity;
         background-size: cover;
-
     }
     .sample_port2 {
+        position: absolute;
+        right: 0;
         background-image: url("https://www.toyobijutsu-prt.co.jp/wp-content/uploads/2024/09/art_1.webp");
-        width: 50%;
         background-position: center;
         background-color: black;
         background-blend-mode: luminosity;
         background-size: cover;
+    }
+    .sample_port1:hover {
+        width: 80%;
+        z-index: 5;
+    }
+    .sample_port2:hover {
+        width: 80%;
+        z-index: 5;
     }
 </style>
 </head>
