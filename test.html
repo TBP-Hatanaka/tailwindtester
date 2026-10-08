@@ -1,20 +1,32 @@
 <!doctype html>
 <html>
 <head>
+<meta charset="utf-8">
 <title>テストページ</title>
 <style>
     .sample_column {
-        width: 100%;
+        width: 80%;
+        top: 100px;
+        position: relative;
+        margin: auto;
         display: flex;
         justify-content: space-between;
     }
     .sample_block {
-        width: 200px;
-        height: 200px;
+        width: 640px;
+        height: 640px;
+        box-sizing: border-box;
         background: black;
         color: white;
         text-align: center;
         align-content: center;
+        border: 5px solid transparent;
+        transition: color 0.2s, border-color 0.2s;
+    }
+
+    .sample_block:hover {
+        color: red;
+        border-color: red;
     }
 </style>
 </head>
@@ -29,5 +41,16 @@
         <h4>美術印刷</h4>
     </div>
 </div>
+<script>
+    const blocks = document.querySelectorAll('.sample_block');
+    blocks.forEach((block) => {
+        block.addEventListener('mouseenter', () => {
+            block.classList.add('block-active');
+        });
+        block.addEventListener('mouseleave', () => {
+            block.classList.remove('block-active');
+        });
+    });
+</script>
 </body>
 </html>
