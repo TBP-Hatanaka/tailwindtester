@@ -12,7 +12,7 @@
         display: flex;
         justify-content: space-between;
     }
-    .sample_block {
+    .sample_block1, .sample_block2 {
         width: 640px;
         height: 640px;
         box-sizing: border-box;
@@ -20,37 +20,36 @@
         color: white;
         text-align: center;
         align-content: center;
-        border: 5px solid transparent;
-        transition: color 0.2s, border-color 0.2s;
+        border: 12px solid transparent;
+        transition: color 1s, border-color 1s;
+    }
+    h2 {
+        font-size: 48px;
+    }
+    h4 {
+        font-size: 24px;
     }
 
-    .sample_block:hover {
+    .sample_block1:hover {
         color: red;
         border-color: red;
+    }
+    .sample_block2:hover {
+        color: blue;
+        border-color: blue;
     }
 </style>
 </head>
 <body>
 <div class="sample_column">
-    <div class="sample_block">
+    <div class="sample_block1">
         <h2>COMMUNICATION SUPPORT</h2>
         <h4>コミュニケーションサポート</h4>
     </div>
-    <div class="sample_block">
+    <div class="sample_block2">
         <h2>ART PRINT</h2>
         <h4>美術印刷</h4>
     </div>
 </div>
-<script>
-    const blocks = document.querySelectorAll('.sample_block');
-    blocks.forEach((block) => {
-        block.addEventListener('mouseenter', () => {
-            block.classList.add('block-active');
-        });
-        block.addEventListener('mouseleave', () => {
-            block.classList.remove('block-active');
-        });
-    });
-</script>
 </body>
 </html>
