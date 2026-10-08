@@ -101,38 +101,29 @@
         font-size: 24px;
         margin: 0;
     }
-    .sample_block1 h2, .sample_block1 h4 {
+    .sample_block1 h2,
+    .sample_block1 h4,
+    .sample_block2 h2,
+    .sample_block2 h4 {
         margin: 0;
+
+        background-image: linear-gradient(
+            to right,
+            var(--accent-color) 0%,
+            var(--accent-color) 50%,
+            white 50%,
+            white 100%
+        );
         background-size: 200% 100%;
         background-position: 100% 0;
-        background: linear-gradient(
-            to right,
-            red 0%,
-            red 0%,
-            white 0%,
-            white 0%
-        );
+
         color: transparent;
         background-clip: text;
         -webkit-background-clip: text;
+
         transition: background-position 1s ease;
     }
-    .sample_block2 h2, .sample_block2 h4 {
-        margin: 0;
-        background-size: 200% 100%;
-        background-position: 100% 0;
-        background: linear-gradient(
-            to right,
-            blue 0%,
-            blue 0%,
-            white 0%,
-            white 0%
-        );
-        color: transparent;
-        background-clip: text;
-        -webkit-background-clip: text;
-        transition: background-position 1s ease;
-    }
+
     .sample_block1:hover h2,
     .sample_block1:hover h4,
     .sample_block2:hover h2,
