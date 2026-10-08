@@ -38,29 +38,58 @@
         background-blend-mode: luminosity;
         background-size: cover;
     }
-    .sample_block1::after {
-        content: "";
-        position: absolute;
-        inset: -5px;
-        border: 12px solid red;
-        pointer-events: none;
-        transform: scaleX(0);
-        transform-origin: left;
-        transition: transform 1s ease;
+
+    @property --border-progress {
+        syntax: "<percentage>";
+        inherits: false;
+        initial-value: 0%;
     }
+
+    .sample_block1,
+    .sample_block2 {
+        --border-progress: 0%;
+        --accent-color: red;
+    }
+
+    .sample_block2 {
+        --accent-color: blue;
+    }
+
+    .sample_block1::after,
     .sample_block2::after {
         content: "";
         position: absolute;
-        inset: -5px;
-        border: 12px solid blue;
+
+        /* 元の白い枠線の上に重ねる */
+        inset: -12px;
+        padding: 12px;
+
+        background: conic-gradient(
+            from -45deg,
+            var(--accent-color) 0%,
+            var(--accent-color) var(--border-progress),
+            transparent var(--border-progress),
+            transparent 100%
+        );
+
+        /* 中央部分をくり抜き、枠線だけ表示する */
+        mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+        mask-composite: exclude;
+
+        -webkit-mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+
         pointer-events: none;
-        transform: scaleX(0);
-        transform-origin: left;
-        transition: transform 1s ease;
+        transition: --border-progress 1s linear;
     }
+
     .sample_block1:hover::after,
     .sample_block2:hover::after {
-        transform: scaleX(1);
+        --border-progress: 100%;
     }
     .sample_block1 h2, .sample_block2 h2 {
         font-size: 48px;
@@ -73,16 +102,15 @@
         margin: 0;
     }
     .sample_block1 h2, .sample_block1 h4 {
-        font-size: 48px;
         margin: 0;
         background-size: 200% 100%;
         background-position: 100% 0;
         background: linear-gradient(
             to right,
             red 0%,
-            red 50%,
-            white 50%,
-            white 100%
+            red 0%,
+            white 0%,
+            white 0%
         );
         color: transparent;
         background-clip: text;
@@ -90,16 +118,15 @@
         transition: background-position 1s ease;
     }
     .sample_block2 h2, .sample_block2 h4 {
-        font-size: 24px;
         margin: 0;
         background-size: 200% 100%;
         background-position: 100% 0;
         background: linear-gradient(
             to right,
             blue 0%,
-            blue 50%,
-            white 50%,
-            white 100%
+            blue 0%,
+            white 0%,
+            white 0%
         );
         color: transparent;
         background-clip: text;
@@ -109,7 +136,7 @@
     .sample_block1:hover h2,
     .sample_block1:hover h4,
     .sample_block2:hover h2,
-    .sample_block2:hover h4, {
+    .sample_block2:hover h4 {
         background-position: 0 0;
     }
 </style>
