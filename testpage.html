@@ -731,20 +731,42 @@ UCD診断</p>
         width: 50%;
         height: 100%;
         box-sizing: border-box;
-        color: white;
         text-align: center;
         align-content: center;
         position: relative;
         z-index: 1;
         transition:
           width 1s cubic-bezier(0.22, 1, 0.36, 1),
-          filter 1s ease,
-          color 1s ease;
+          filter 1s ease;
     }
-    .sample_port1:hover + .sample_port2,
+    .sample_port1 h2, .sample_port1 h4,
+    .sample_port2 h2, .sample_port2 h4 {
+        position: relative;
+        z-index: 2;
+        color: white;
+        transition: color 1s ease;
+    }
+    .sample_port1:hover + .sample_port1 h2,
+    .sample_port1:hover + .sample_port1 h4 {
+        z-index: 6;
+    }
+    .sample_port2:hover + .sample_port2 h2,
+    .sample_port2:hover + .sample_port2 h4 {
+        z-index: 6;
+    }
+    .sample_port1:hover + .sample_port2 h2,
+    .sample_port1:hover + .sample_port2 h4 {
+        color: #676767;
+    }
+    .sample_port2:hover + .sample_port1 h2,
+    .sample_port2:hover + .sample_port1 h4 {
+        color: #676767;
+    }
+    .sample_port1:hover + .sample_port2 {
+      filter: brightness(0.5);
+    }
     .sample_port2:hover + .sample_port1 {
       filter: brightness(0.5);
-      color: #676767;
     }
     .sample_port1 {
         position: absolute;
