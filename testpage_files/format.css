@@ -1,0 +1,62 @@
+@charset "UTF-8";
+/** FONTS
+==============================================*/
+@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Spartan:wght@600&display=swap");
+/** format
+==============================================*/
+body {
+  color: #333;
+  font-family: 'Noto Sans JP', '游ゴシック', YuGothic, 'メイリオ', Meiryo, 'ＭＳ Ｐゴシック', 'MS PGothic', Helvetica, Arial, Verdana, sans-serif;
+  word-break: break-all;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  vertical-align: middle;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+#wrapper {
+  /*overflow: hidden;*/
+  padding-top: 184px;
+}
+
+@media only screen and (min-width: 769px) {
+  .sp {
+    display: none !important;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .pc {
+    display: none !important;
+  }
+}
+
+@media screen and (min-width: 800px) {
+    .video_wrap {
+        text-align: center;
+     }
+    video {
+        height: 480px;
+        width: 800px;
+     }
+    iframe {
+        height: 480px;
+        width: 880px;
+     }
+}
+@media screen and (max-width: 799px) {
+    .video_wrap {
+        text-align: center;
+     }
+    video {
+        width: 90%;
+     }
+    iframe {
+        width: 90%;
+     }
+}
