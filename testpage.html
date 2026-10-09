@@ -714,6 +714,115 @@ UCD診断</p>
   header.is-active{background-color: #fff;}
 }
 
+    @property --border-progress {
+        syntax: "<percentage>";
+        inherits: false;
+        initial-value: 0%;
+    }
+
+    .sample_port {
+        width: 100%;
+        height: 100vh;
+        top: 480px;
+        position: relative;
+        margin: auto;
+        display: flex;
+    }
+    .sample_port1, .sample_port2 {
+        width: 50%;
+        height: 100%;
+        box-sizing: border-box;
+        color: white;
+        text-align: center;
+        align-content: center;
+        position: relative;
+        z-index: 1;
+        transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .sample_port1 {
+        position: absolute;
+        left: 0;
+        background-image: url("https://www.toyobijutsu-prt.co.jp/wp-content/uploads/2024/09/insurance_1.webp");
+        background-position: left;
+        background-size: cover;
+        background-repeat: no-repeat;
+        overflow: hidden;
+
+    }
+    .sample_port2 {
+        position: absolute;
+        right: 0;
+        background-image: url("https://www.toyobijutsu-prt.co.jp/wp-content/uploads/2024/09/art_1.webp");
+        background-position: right;
+        background-size: cover;
+        background-repeat: no-repeat;
+        overflow: hidden;
+    }
+    .sample_port1 h2, .sample_port2 h2 {
+        font-size: 48px;
+        margin: 0;
+        background-size: 200% 100%;
+        background-position: 100% 0;
+    }
+    .sample_port1 h4, .sample_port2 h4 {
+        font-size: 24px;
+        margin: 0;
+    }
+    .sample_port1::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+            url("https://www.toyobijutsu-prt.co.jp/wp-content/uploads/2024/09/insurance_1.webp");
+        background-position: left center;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-color: black;
+        background-blend-mode: luminosity;
+        opacity: 1;
+        transition: opacity 1s ease;
+        pointer-events: none;
+    }
+    .sample_port2::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+            url("https://www.toyobijutsu-prt.co.jp/wp-content/uploads/2024/09/art_1.webp");
+        background-position: right center;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-color: black;
+        background-blend-mode: luminosity;
+        opacity: 1;
+        transition: opacity 1s ease;
+        pointer-events: none;
+    }
+    .sample_port1:hover::before {
+        opacity: 0;
+    }
+    .sample_port2:hover::before {
+        opacity: 0;
+    }
+    .sample_port1:hover {
+        width: 80%;
+        z-index: 5;
+    }
+    .sample_port2:hover {
+        width: 80%;
+        z-index: 5;
+    }
+    .sample_port1 h2,
+    .sample_port1 h4 {
+        position: relative;
+        z-index: 1;
+    }
+    .sample_port2 h2,
+    .sample_port2 h4 {
+        position: relative;
+        z-index: 1;
+    }
+
 </style>
 
 <script src="./testpage_files/jquery-3.5.1.min.js"></script>
@@ -925,8 +1034,15 @@ document.addEventListener("DOMContentLoaded", function () {
 </div>
 
 <section id="S015">
-<div>
-  テスト
+<div class="sample_port">
+    <div class="sample_port1">
+        <h2>COMMUNICATION SUPPORT</h2>
+        <h4>コミュニケーションサポート</h4>
+    </div>
+    <div class="sample_port2">
+        <h2>ART PRINT</h2>
+        <h4>美術印刷</h4>
+    </div>
 </div>
 </section>
 
