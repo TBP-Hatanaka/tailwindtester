@@ -940,71 +940,6 @@ window.addEventListener('scroll', function() {
 
   });
 	
-  // 灰色の丸を非表示にする
-  $('.circle1').hide();
-  $('.circle2').hide();
-  $('.circle3').hide();
-  $('.circle4').hide();
-  $('.circle5').hide();
-  $('.circle6').hide();
-  $('.circle7').hide();
-  $('.circle8').hide();
-  $('.circle9').hide();
-  $('.circle10').hide();
-  $('.circle11').hide();
-  $('.circle12').hide();
-  $('.circle13').hide();
-
-
-  $(window).scroll(function() {
-    var scroll = window.scrollY || window.pageYOffset; 
-    var windowHeight = $(window).height();
-    var windowWidth = $(window).width();
-    // 画面の最大サイズを求める
-    //var maxSize = Math.max(windowHeight, windowWidth);
-    var maxCircleSize = Math.max(windowHeight, windowWidth) * 4;
-    var circle1Width = 0;
-    var circlesWidth = 0;
-    circle1Width = 300 + (scroll - box1Top +500)*2; // 灰色の丸の大きさを調整する値
-    circlesWidth = 300 + (scroll - box1Top +500)*2; // カラフルな丸の大きさを調整する値
-
-    if(scroll > box1Top - 500 + windowHeight && scroll <= box1Top - 500 + windowHeight*2){
-    	circle1Width = 300 + windowHeight*2;
-    	circlesWidth = 300 + windowHeight*2;
-    }else if(scroll > box1Top - 500 + windowHeight*2){
-    	circle1Width = maxCircleSize;
-    	circlesWidth = 300 - (scroll - box1Top)*2;
-    } 
-    
-    $('.circle1').css({ width: (circle1Width) * 4 + 'px', height: (circle1Width) * 4 + 'px'});
-    $('.circle2').css({ width: (circlesWidth) / 10 + 'px', height: (circlesWidth) / 10 + 'px'});
-    $('.circle3').css({ width: (circlesWidth) / 9 + 'px', height: (circlesWidth) / 9 + 'px'});
-    $('.circle4').css({ width: (circlesWidth) / 12 + 'px', height: (circlesWidth) / 12 + 'px'});
-    $('.circle5').css({ width: (circlesWidth) / 10 + 'px', height: (circlesWidth) / 10 + 'px'});
-    $('.circle6').css({ width: (circlesWidth) / 40 + 'px', height: (circlesWidth) / 40 + 'px'});
-    $('.circle7').css({ width: (circlesWidth) / 40 + 'px', height: (circlesWidth) / 40 + 'px'});
-    $('.circle8').css({ width: (circlesWidth) / 40 + 'px', height: (circlesWidth) / 40 + 'px'});
-    $('.circle9').css({ width: (circlesWidth) / 40 + 'px', height: (circlesWidth) / 40 + 'px'});
-    $('.circle10').css({ width: (circlesWidth) / 20 + 'px', height: (circlesWidth) / 20 + 'px'});
-    $('.circle11').css({ width: (circlesWidth) / 20 + 'px', height: (circlesWidth) / 20 + 'px'});
-    $('.circle12').css({ width: (circlesWidth) / 20 + 'px', height: (circlesWidth) / 20 + 'px'});
-    $('.circle13').css({ width: (circlesWidth) / 25 + 'px', height: (circlesWidth) / 25 + 'px'});
-
-    // スクロールが始まったら灰色の丸を表示する
-    $('.circle1').show();
-    $('.circle2').show();
-    $('.circle3').show();
-    $('.circle4').show();
-    $('.circle5').show();
-    $('.circle6').show();
-    $('.circle7').show();
-    $('.circle8').show();
-    $('.circle9').show();
-    $('.circle10').show();
-    $('.circle11').show();
-    $('.circle12').show();
-    $('.circle13').show();
-  });
 });
 
 $(function(){
@@ -1039,14 +974,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <section id="S015">
 <div class="sample_port">
+  <a href="#communication_support">
     <div class="sample_port1">
         <h2>COMMUNICATION SUPPORT</h2>
         <h4>コミュニケーションサポート</h4>
     </div>
+  </a>
+  <a href="https://www.toyobijutsu-prt.co.jp/solution/art/">
     <div class="sample_port2">
         <h2>ART PRINT</h2>
         <h4>美術印刷</h4>
     </div>
+  </a>
 </div>
 </section>
 <div class="sample_spacer"></div>
@@ -1056,12 +995,13 @@ document.addEventListener("DOMContentLoaded", function () {
 <div class="contentsDetail">
 <div class="title_box" id="section_start">
 <p class="section_title">Business</p>
-<p><img class="section_statment" src="./testpage_files/service1.svg"><img class="section_statment_back" src="./testpage_files/service2.svg"></p>
+<p><a name="communication_support"><img class="section_statment" src="./testpage_files/service1.svg"><img class="section_statment_back" src="./testpage_files/service2.svg"></a></p>
 <div class="section_clear"></div>
 <div class="title_text">
-<p>私たちは1935年の創業以来、一貫して</p>
-<p>コミュニケーションを社会へとつなげてきました。</p>
-<p>その度に必要なセンスとナレッジを蓄積してきました。</p>
+<p>私たちは企業、そして人のコミュニケーションの目的を理解し、</p>
+<p>その達成のための様々な手段を提供し続けています。</p>
+<p>創造力豊かなクリエイティブワークと、確かな品質で、</p>
+<p>お客様の期待を超える制作や印刷、デジタルメディアをお届けしています。</p>
 </div>
 </div>
 </div>
