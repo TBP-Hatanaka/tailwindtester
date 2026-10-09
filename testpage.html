@@ -738,11 +738,13 @@ UCD診断</p>
         z-index: 1;
         transition:
           width 1s cubic-bezier(0.22, 1, 0.36, 1),
-          filter 1s ease;
+          filter 1s ease,
+          color 1s ease;
     }
     .sample_port1:hover + .sample_port2,
     .sample_port2:hover + .sample_port1 {
       filter: brightness(0.5);
+      color: #676767;
     }
     .sample_port1 {
         position: absolute;
