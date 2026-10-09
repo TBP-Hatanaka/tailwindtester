@@ -736,7 +736,13 @@ UCD診断</p>
         align-content: center;
         position: relative;
         z-index: 1;
-        transition: width 1s cubic-bezier(0.22, 1, 0.36, 1);
+        transition:
+          width 1s cubic-bezier(0.22, 1, 0.36, 1),
+          filter 1s ease;
+    }
+    .sample_port1:hover + .sample_port2,
+    .sample_port2:hover + .sample_port1 {
+      filter: brightness(0.5);
     }
     .sample_port1 {
         position: absolute;
@@ -804,11 +810,11 @@ UCD診断</p>
         opacity: 0;
     }
     .sample_port1:hover {
-        width: 80%;
+        width: 65%;
         z-index: 5;
     }
     .sample_port2:hover {
-        width: 80%;
+        width: 65%;
         z-index: 5;
     }
     .sample_port1 h2,
@@ -831,7 +837,6 @@ UCD診断</p>
       float: left;
       padding-bottom: 36px;
     }
-
 </style>
 
 <script src="./testpage_files/jquery-3.5.1.min.js"></script>
